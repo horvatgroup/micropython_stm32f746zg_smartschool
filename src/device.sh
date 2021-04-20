@@ -9,12 +9,18 @@ case $1 in
     rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE repl
     ;;
 
-  flash)
-    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE cp main.py /pyboard/flash/main.py
-    ;;
-
   shell)
     rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE shell
+    ;;
+
+  flash)
+    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE cp main.py /pyboard/flash/
+    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE cp common.py /pyboard/flash/
+    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE cp peripherals.py /pyboard/flash/
+    ;;
+    
+  flashlibs)
+    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE cp mqtt_async.py /pyboard/flash/
     ;;
 
   *)
