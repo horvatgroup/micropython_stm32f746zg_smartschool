@@ -10,7 +10,7 @@ case $1 in
     ;;
 
   flash)
-    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE cp led_blink.py /pyboard/flash/main.py
+    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE cp main.py /pyboard/flash/main.py
     ;;
 
   shell)
