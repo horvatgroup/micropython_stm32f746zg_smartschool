@@ -1,13 +1,14 @@
-from utime import sleep
-from common import create_led, create_button
+from common import dump_func, create_led, create_button
+from peripherals import register_button_callback_function, check_button
 import network
 import socket
 
 lan = None
 client = None
 
+
+@dump_func(timing=True)
 def test_network():
-    print("test network start")
     global lan
     lan = network.LAN()
     lan.active(True)
@@ -15,8 +16,9 @@ def test_network():
     result = lan.ifconfig()
     if result:
         print(result)
-    print("test network end")
 
+
+@dump_func(timing=True, showarg=True)
 def http_get(url):
     print("http get start")
     import socket
@@ -33,22 +35,15 @@ def http_get(url):
             break
     s.close()
     print("http get end")
-    
-def on_button_callback(state):
-    print("button %s" % (("released", "pressed")[state]))
-    if not state:
-        return
-    toggle_leds()
-    http_get('http://micropython.org/ks/test.html')
 
-def check_button():
-    global button_state
-    state = button.value()
-    if state != button_state:
-        button_state = state
-        on_button_callback(button_state)
+
+def on_button_callback(state):
+    if state:
+        http_get('http://micropython.org/ks/test.html')
+
 
 if __name__ == "__main__":
     test_network()
+    register_button_callback_function(on_button_callback)
     while True:
         check_button()

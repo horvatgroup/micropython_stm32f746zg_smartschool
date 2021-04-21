@@ -1,4 +1,4 @@
-from common import create_led, create_button
+from common import dump_func, create_led, create_button
 
 LED_PINS = ['B0', 'B7', 'B14']
 BUTTON_PIN = 'C13'
@@ -14,8 +14,8 @@ button = create_button(BUTTON_PIN)
 button_state = 0
 
 
+@dump_func()
 def toggle_leds():
-    print("toggle leds")
     global current_led
     leds[current_led].value(not leds[current_led].value())
     current_led += 1
@@ -23,11 +23,12 @@ def toggle_leds():
         current_led = 0
 
 
+@dump_func(showarg=True)
 def on_button_callback(state):
-    print("button %s" % (("released", "pressed")[state]))
-    if not state:
-        return
-    toggle_leds()
+    if button_callback_function:
+        button_callback_function(state)
+    if state:
+        toggle_leds()
 
 
 def check_button():
@@ -38,6 +39,7 @@ def check_button():
         on_button_callback(button_state)
 
 
+@dump_func()
 def register_button_callback_function(callback_function):
     global button_callback_function
     button_callback_function = callback_function

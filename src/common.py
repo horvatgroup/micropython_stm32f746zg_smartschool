@@ -10,16 +10,21 @@ def millis_passed(timestamp):
     return get_millis() - timestamp
 
 
-def dump_func(exit=False, timing=False):
+def dump_func(pexit=False, timing=False, showarg=False):
     def inner_decorator(f):
         def wrapped(*args, **kwargs):
             enter_string = "%s enter" % (f.__name__)
+            if showarg:
+                enter_string += ", args[%s%s]" % (args, kwargs)
             print(enter_string)
-            if timing: timestamp = get_millis() 
+            if timing:
+                pexit = True
+                timestamp = get_millis()
             response = f(*args, **kwargs)
             exit_string = "%s exit" % (f.__name__)
-            if timing: exit_string += ", time[%d]" % (millis_passed(timestamp)) 
-            if exit:
+            if timing:
+                exit_string += ", time[%d]" % (millis_passed(timestamp))
+            if pexit:
                 print(exit_string)
             return response
         return wrapped
