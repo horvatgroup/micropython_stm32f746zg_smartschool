@@ -5,12 +5,14 @@ BUTTON_PIN = 'C13'
 
 leds = []
 current_led = 0
+button_callback_function = None
 
 for pin in LED_PINS:
     leds.append(create_led(pin))
 
 button = create_button(BUTTON_PIN)
 button_state = 0
+
 
 def toggle_leds():
     print("toggle leds")
@@ -20,11 +22,13 @@ def toggle_leds():
     if current_led >= len(leds):
         current_led = 0
 
+
 def on_button_callback(state):
     print("button %s" % (("released", "pressed")[state]))
     if not state:
         return
     toggle_leds()
+
 
 def check_button():
     global button_state
@@ -32,3 +36,8 @@ def check_button():
     if state != button_state:
         button_state = state
         on_button_callback(button_state)
+
+
+def register_button_callback_function(callback_function):
+    global button_callback_function
+    button_callback_function = callback_function
