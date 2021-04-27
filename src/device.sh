@@ -10,17 +10,21 @@ case $1 in
     ;;
 
   shell)
-    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE shell
+    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE
     ;;
 
   flash)
-    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE cp main.py /pyboard/flash/
-    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE cp common.py /pyboard/flash/
-    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE cp peripherals.py /pyboard/flash/
+    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE cp \
+      main.py \
+      common.py \
+      peripherals.py \
+      /pyboard/flash/
     ;;
     
   flashlibs)
-    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE cp mqtt_async.py /pyboard/flash/
+    rshell -p $DEVICE_PATH --buffer-size $BUFFER_SIZE cp \
+    umqtt_simple.py \
+    /pyboard/flash/
     ;;
 
   *)

@@ -12,6 +12,8 @@ def test_network():
     global lan
     lan = network.LAN()
     lan.active(True)
+    # TODO: handle exception
+    # OSError: timeout waiting for DHCP to get IP address
     lan.ifconfig('dhcp')
     result = lan.ifconfig()
     if result:
@@ -20,7 +22,6 @@ def test_network():
 
 @dump_func(timing=True, showarg=True)
 def http_get(url):
-    print("http get start")
     import socket
     _, _, host, path = url.split('/', 3)
     addr = socket.getaddrinfo(host, 80)[0][-1]
@@ -34,7 +35,6 @@ def http_get(url):
         else:
             break
     s.close()
-    print("http get end")
 
 
 def on_button_callback(state):
