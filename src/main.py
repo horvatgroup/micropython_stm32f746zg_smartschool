@@ -5,6 +5,11 @@ from umqtt_simple import MQTTClient
 import ubinascii
 import machine
 
+#testing
+# sudo systemctl start mosquitto
+# mosquitto_sub -t "led"
+# mosquitto_pub -h 192.168.88.75 -t "foo_topic" -m "bok"
+
 SERVER = "192.168.88.75"
 CLIENT_ID = ubinascii.hexlify(machine.unique_id())
 TOPIC = b"led"
