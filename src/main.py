@@ -1,4 +1,4 @@
-from common import dump_func, create_led, create_button
+from common import dump_func, create_led, create_button, get_millis, millis_passed
 from peripherals import register_button_callback_function, check_button
 import network
 from umqtt_simple import MQTTClient
@@ -10,9 +10,12 @@ import machine
 # mosquitto_sub -t "led"
 # mosquitto_pub -h 192.168.88.75 -t "foo_topic" -m "bok"
 
-SERVER = "192.168.88.75"
 CLIENT_ID = ubinascii.hexlify(machine.unique_id())
-TOPIC = b"led"
+SERVER = "soldier.cloudmqtt.com"
+PORT = 16200
+USER = "exrkeina"
+PASSWORD = "2zUqpbUBMZGY"
+TOPIC = b"micropython/uptime"
 lan = None
 client = None
 
@@ -54,10 +57,10 @@ def sub_cb(topic, msg):
 @dump_func(timing=True)
 def test_mqtt():
     global client
-    client = MQTTClient(CLIENT_ID, SERVER)
+    client = MQTTClient(client_id=CLIENT_ID, server=SERVER, port=PORT, user=USER, password=PASSWORD)
     client.connect()
     client.set_callback(sub_cb)
-    client.subscribe(b"foo_topic")
+    client.subscribe(b"micropython/led")
     #TODO: handle
     # OSError: [Errno 104] ECONNRESET
     # client.disconnect()
@@ -66,6 +69,15 @@ def test_mqtt():
 def on_button_callback(state):
     client.publish(TOPIC, "toggle %s".encode() % (state))
 
+timestamp = 0
+
+def send_mqtt_uptime():
+    global timestamp
+    if (millis_passed(timestamp) > 30000):
+        timestamp = get_millis()
+        print("uptime %d" % (timestamp))
+        client.publish(TOPIC, "uptime %d".encode() % (timestamp))
+        
 
 if __name__ == "__main__":
     test_network()
@@ -74,4 +86,9 @@ if __name__ == "__main__":
     register_button_callback_function(on_button_callback)
     while True:
         check_button()
-        client.check_msg()
+        send_mqtt_uptime()
+        try:
+            client.check_msg()
+        except Exception as e:
+            print("client.check_msg error %s" % (e))
+            #OSError: -1
