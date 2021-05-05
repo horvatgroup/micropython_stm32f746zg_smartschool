@@ -1,4 +1,4 @@
-from common import dump_func, create_led, create_button
+from common import dump_func, create_led, create_button, get_millis, millis_passed
 
 LED_PINS = ['B0', 'B7', 'B14']
 BUTTON_PIN = 'C13'
@@ -12,6 +12,7 @@ for pin in LED_PINS:
 
 button = create_button(BUTTON_PIN)
 button_state = 0
+button_timestamp = 0
 
 
 @dump_func()
@@ -32,6 +33,10 @@ def on_button_callback(state):
 
 
 def check_button():
+    global button_timestamp
+    if millis_passed(button_timestamp) < 50:
+        return
+    button_timestamp = get_millis()
     global button_state
     state = button.value()
     if state != button_state:

@@ -7,13 +7,11 @@ from subprocess import Popen
 from time import time, sleep
 import typer
 
-project_files = ["main.py", "common.py", "peripherals.py"]
-libs_files = ["umqtt_simple.py"]
 
 options = {
-"DEVICE_PATH": "/dev/ttyACM0",
-"BUFFER_SIZE": 512,
-"VERBOSE": False
+    "DEVICE_PATH": "/dev/ttyACM0",
+    "BUFFER_SIZE": 512,
+    "VERBOSE": False
 }
 
 
@@ -34,7 +32,7 @@ class Base:
 
 def run_bash_cmd(cmd, echo=False, interaction={}, return_lines=True, return_code=False, cr_as_newline=False):
     if options["VERBOSE"]:
-      echo = True
+        echo = True
     if echo:
         print("CMD:", cmd)
     master_fd, slave_fd = pty.openpty()
@@ -102,13 +100,7 @@ def shell():
 
 @app.command()
 def flash():
-    cmd = "%s cp %s /pyboard/flash/" % (get_base_command(), " ".join(project_files))
-    run_bash_cmd(cmd)
-
-
-@app.command()
-def flashlibs():
-    cmd = "%s cp %s /pyboard/flash/" % (get_base_command(), " ".join(libs_files))
+    cmd = "%s rsync ./src /pyboard/flash/" % (get_base_command())
     run_bash_cmd(cmd)
 
 
