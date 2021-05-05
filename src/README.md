@@ -11,3 +11,6 @@ sudo make BOARD=NUCLEO_F746ZG deploy-stlink
 
 #WARN common.c: unknown chip id! 0x1a
 #Setting boot0 to 1, then st-flash erase, then setting it back to 0 and all was working again.
+
+#If pins are missing refer to this page
+#https://github.com/micropython/micropython/issues/3715#issuecomment-832341132
