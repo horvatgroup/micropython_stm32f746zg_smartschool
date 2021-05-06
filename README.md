@@ -1,5 +1,5 @@
 # Micropython for STM32F746ZG
-Testing MQTT on STM32f746ZG written in micropython. This is a part os the project needed to automate schools electrical systems.
+Testing MQTT on STM32f746ZG written in micropython. This is a part of a bigger project needed to automate schools electrical systems.
 
 ## Flashing micropython
 Following [Micropython's README](https://github.com/micropython/micropython/tree/master/ports/stm32#readme) these are the steps:
@@ -12,6 +12,19 @@ Following [Micropython's README](https://github.com/micropython/micropython/tree
 - `make BOARD=NUCLEO_F746ZG`
 - `sudo pacman -S stlink`
 - `sudo make BOARD=NUCLEO_F746ZG deploy-stlink`
+
+## Usage:
+### Flash micropython
+To use the board first you need to flash micropython and this can easily be done using `./make.py flash_micropython` command.
+
+### Flash files
+`./make.py flash`
+
+### Shell
+`./make.py shell`
+
+### Run code and REPL
+To run the code write `./make.py repl` and after entering python interpretter press `Ctrl+D` to start running the code. To exit the running code press `Ctrl+C`. To exit the interpretter press `Ctrl+x`.
 
 ## Issues
 ### `WARN common.c: unknown chip id! 0x1a`
