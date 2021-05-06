@@ -6,7 +6,8 @@ import lan
 def on_button_callback(state):
     pass
 
- if __name__ == "__main__":
+
+if __name__ == "__main__":
     register_button_callback_function(on_button_callback)
     lan.init()
     while True:

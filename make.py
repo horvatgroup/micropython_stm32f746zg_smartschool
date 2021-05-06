@@ -101,7 +101,10 @@ def shell():
 @app.command()
 def flash():
     cmd = "%s rsync ./src /pyboard/flash/" % (get_base_command())
-    run_bash_cmd(cmd)
+    lines = run_bash_cmd(cmd)
+    for line in lines:
+        if "timed out or error" in line:
+            print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
 
 
 @app.callback()
