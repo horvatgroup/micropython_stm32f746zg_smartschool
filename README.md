@@ -1,7 +1,11 @@
 # Micropython for STM32F746ZG
 Testing MQTT on STM32f746ZG written in micropython. This is a part of a bigger project needed to automate schools electrical systems.
 
-## Usage:
+## Prerequests
+- `typer` install it using `pip install --user typer`
+- `stlink` install it using `sudo pacman -S stlink`
+
+## Usage
 ### Flash micropython
 To use the board first you need to flash micropython and this can easily be done using `./make.py flash_micropython` command.
 
@@ -32,7 +36,6 @@ Following [Micropython's README](https://github.com/micropython/micropython/tree
 - `cd ports/stm32/`
 - `make submodules`
 - `make BOARD=NUCLEO_F746ZG`
-- install stlink in arch with `sudo pacman -S stlink`
 - `sudo make BOARD=NUCLEO_F746ZG deploy-stlink`
 
 We are using `release/v1.15/modified` branch because we have modified `ports/stm32/boards/NUCLEO_F746ZG/pins.csv` adding the missing pins.
