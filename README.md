@@ -10,7 +10,7 @@ To use the board first you need to flash micropython and this can easily be done
 `./make.py flash`
 
 ### Shell
-`./make.py shell`
+When using shell with `./make.py shell` you can add files manually to `/pyboard/flash/` or remove them.
 
 ### Run code and REPL
 To run the code write `./make.py repl` and after entering python interpretter press `Ctrl+D` to start running the code. To exit the running code press `Ctrl+C`. To exit the interpretter press `Ctrl+x`.
