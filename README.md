@@ -40,6 +40,8 @@ Following [Micropython's README](https://github.com/micropython/micropython/tree
 
 We are using `release/v1.15/modified` branch because we have modified `ports/stm32/boards/NUCLEO_F746ZG/pins.csv` adding the missing pins.
 
+It is also possible to convert `firmware.hex` to `.bin` using the next command `objcopy -I ihex firmware.hex -O binary firmware.bin` and then copy it to the NUCLEO's SD card.
+
 ## Enhancements
 ### Adding missing pins
 If pins are missing refer to this page on [Micropython's ISSUE page](https://github.com/micropython/micropython/issues/3715#issuecomment-832341132)
