@@ -20,7 +20,7 @@ Something went wrong with the board and it needs to be erased.
 - set boot0 to HIGH
 - run `./make.py erase` or `st-flash erase`
 - set boot0 to LOW and reset the board
-Remember to flash the files back because they will be lost.
+Remember to `flash_micropython` and `flash` the files back because they will be lost in the progress.
 
 ## Flashing micropython manualy
 Following [Micropython's README](https://github.com/micropython/micropython/tree/master/ports/stm32#readme) these are the steps:
@@ -30,6 +30,7 @@ Following [Micropython's README](https://github.com/micropython/micropython/tree
 - `git checkout release/v1.15/modified`
 - `make -C mpy-cross`
 - `cd ports/stm32/`
+- `make submodules`
 - `make BOARD=NUCLEO_F746ZG`
 - install stlink in arch with `sudo pacman -S stlink`
 - `sudo make BOARD=NUCLEO_F746ZG deploy-stlink`

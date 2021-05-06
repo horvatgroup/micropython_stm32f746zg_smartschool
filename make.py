@@ -107,6 +107,26 @@ def flash():
             print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
 
 
+@app.command()
+def flash_micropython():
+    cmd = "st-flash write ./build-NUCLEO_F746ZG/firmware0.bin 0x08000000"
+    lines = run_bash_cmd(cmd)
+    cmdSuccess = any("jolly good" in line for line in lines)
+    if (cmdSuccess):
+        cmd = "st-flash write ./build-NUCLEO_F746ZG/firmware1.bin 0x08020000"
+        lines = run_bash_cmd(cmd)
+        cmdSuccess = any("jolly good" in line for line in lines)
+        if cmdSuccess:
+            return
+    print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
+
+
+@app.command()
+def erase():
+    cmd = "st-flash erase"
+    run_bash_cmd(cmd)
+
+
 @app.callback()
 def main(verbose: bool = True, device_path: str = ""):
     global options
