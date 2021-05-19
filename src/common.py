@@ -50,8 +50,8 @@ def create_input(pin, pullup=None):
         return Pin(pin, Pin.IN, Pin.PULL_DOWN)
 
 
-def create_uart(pin_tx, pin_rx, baud=9600, instance=1):
-    return UART(instance, rx=pin_rx, tx=pin_tx, baudrate=baud, bits=8, parity=None, stop=1, rxbuf=2048, txbuf=256)
+def create_uart(instance, pin_rx, pin_tx, baud=9600):
+    return UART(instance, rx=pin_rx, tx=pin_tx, baudrate=baud, bits=8, parity=None, stop=1, rxbuf=128, txbuf=128)
 
 
 def create_i2c(pin_scl, pin_sda):
