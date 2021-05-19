@@ -1,5 +1,5 @@
 from machine import Pin
-from time import ticks_ms
+from time import ticks_ms, sleep
 
 
 def get_millis():
@@ -49,3 +49,10 @@ def create_input(pin, pullup=None):
     else:
         return Pin(pin, Pin.IN, Pin.PULL_DOWN)
 
+def test_pin(pin_name):
+    led = create_output(pin_name)
+    led.off()
+    sleep(0.2)
+    led.on()
+    sleep(2)
+    led.off()

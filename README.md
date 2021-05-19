@@ -38,6 +38,7 @@ Following [Micropython's README](https://github.com/micropython/micropython/tree
 - `make BOARD=NUCLEO_F746ZG`
 - `sudo make BOARD=NUCLEO_F746ZG deploy-stlink`
 
+If you have issue with compile `accessing 64 bytes in a region of size 48` check this link [github.com/ARMmbed](https://github.com/ARMmbed/mbedtls/issues/4130#issuecomment-776024766)
 We are using `release/v1.15/modified` branch because we have modified `ports/stm32/boards/NUCLEO_F746ZG/pins.csv` adding the missing pins.
 
 It is also possible to convert `firmware.hex` to `.bin` using the next command `objcopy -I ihex firmware.hex -O binary firmware.bin` and then copy it to the NUCLEO's SD card.
