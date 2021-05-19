@@ -13,18 +13,18 @@ def millis_passed(timestamp):
 def dump_func(pexit=False, timing=False, showarg=False):
     def inner_decorator(f):
         def wrapped(*args, **kwargs):
-            enter_string = "%s enter" % (f.__name__)
+            enter_string = "%s.%s <enter>" % (f.__globals__['__name__'], f.__name__)
             pexit_local = False
             if showarg:
-                enter_string += ", args[%s%s]" % (args, kwargs)
+                enter_string += ", <args[%s%s]>" % (args, kwargs)
             print(enter_string)
             if timing:
                 pexit_local = True
                 timestamp = get_millis()
             response = f(*args, **kwargs)
-            exit_string = "%s exit" % (f.__name__)
+            exit_string = "%s <exit>" % (f.__name__)
             if timing:
-                exit_string += ", time[%d]" % (millis_passed(timestamp))
+                exit_string += ", <time[%d]>" % (millis_passed(timestamp))
             if pexit or pexit_local:
                 print(exit_string)
             return response
@@ -37,9 +37,15 @@ def print_available_pins():
     print(dir(Pin.cpu))
 
 
-def create_led(pin):
+def create_output(pin):
     return Pin(pin, Pin.OUT)
 
 
-def create_button(pin):
-    return Pin(pin, Pin.IN, Pin.PULL_DOWN)
+def create_input(pin, pullup=None):
+    if pullup == None:
+        return Pin(pin, Pin.IN, None)
+    if pullup:
+        return Pin(pin, Pin.IN, Pin.PULL_UP)
+    else:
+        return Pin(pin, Pin.IN, Pin.PULL_DOWN)
+

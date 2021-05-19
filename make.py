@@ -9,7 +9,7 @@ import typer
 
 
 options = {
-    "DEVICE_PATH": "/dev/ttyACM0",
+    "DEVICE_PATH": "/dev/ttyACM1",
     "BUFFER_SIZE": 512,
     "VERBOSE": False
 }

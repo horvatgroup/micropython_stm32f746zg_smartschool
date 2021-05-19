@@ -1,4 +1,4 @@
-from common import dump_func, create_led, create_button, get_millis, millis_passed
+from common import dump_func, create_output, create_input, get_millis, millis_passed
 
 LED_PINS = ['B0', 'B7', 'B14']
 BUTTON_PIN = 'C13'
@@ -8,9 +8,9 @@ current_led = 0
 button_callback_function = None
 
 for pin in LED_PINS:
-    leds.append(create_led(pin))
+    leds.append(create_output(pin))
 
-button = create_button(BUTTON_PIN)
+button = create_input(BUTTON_PIN, False)
 button_state = 0
 button_timestamp = 0
 
@@ -48,3 +48,7 @@ def check_button():
 def register_button_callback_function(callback_function):
     global button_callback_function
     button_callback_function = callback_function
+
+
+def loop():
+    check_button()
