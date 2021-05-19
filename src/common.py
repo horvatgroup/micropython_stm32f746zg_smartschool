@@ -1,4 +1,4 @@
-from machine import Pin
+from machine import Pin, SoftI2C, UART
 from time import ticks_ms, sleep
 
 
@@ -48,6 +48,15 @@ def create_input(pin, pullup=None):
         return Pin(pin, Pin.IN, Pin.PULL_UP)
     else:
         return Pin(pin, Pin.IN, Pin.PULL_DOWN)
+
+
+def create_uart(pin_tx, pin_rx, baud=9600, instance=1):
+    return UART(instance, rx=pin_rx, tx=pin_tx, baudrate=baud, bits=8, parity=None, stop=1, rxbuf=2048, txbuf=256)
+
+
+def create_i2c(pin_scl, pin_sda):
+    return SoftI2C(pin_scl, pin_sda)
+
 
 def test_pin(pin_name):
     led = create_output(pin_name)
