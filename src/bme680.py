@@ -234,7 +234,7 @@ class Adafruit_BME680:
 
 
 class BME680_I2C(Adafruit_BME680):
-    def __init__(self, i2c, address=0x77, debug=False, *, refresh_rate=10):
+    def __init__(self, i2c, address=0x76, debug=False, *, refresh_rate=10):
         self._i2c = i2c
         self._address = address
         self._debug = debug
