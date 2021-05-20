@@ -77,11 +77,11 @@ def init():
     for device in i2c.scan():
         print("  0x%02X" % (device))
     #https://forum.micropython.org/viewtopic.php?t=6484
-    uart = common.create_uart(2, pins.S2_RS232_RX, pins.S2_RS232_TX)
+    #uart = common.create_uart(2, pins.S2_RS232_RX, pins.S2_RS232_TX)
     radar_init()
     env_sensor_init()
     light_sensor_init()
-    co2_sensor_init()
+    #co2_sensor_init()
 
 
 def loop():
