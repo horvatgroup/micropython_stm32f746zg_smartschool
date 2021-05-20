@@ -8,7 +8,6 @@ def on_button_callback(state):
 
 
 if __name__ == "__main__":
-    print("oj")
     peripherals.register_button_callback_function(on_button_callback)
     sensors.init()
     # lan.init()

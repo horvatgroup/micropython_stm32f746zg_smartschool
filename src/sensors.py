@@ -67,25 +67,25 @@ def check_co2_sensor():
     if common.millis_passed(co2_sensor_timestamp) >= co2_sensor_timeout:
         co2_sensor_timestamp = common.get_millis()
         result = co2_sensor.measure()
-        print('co2 %.2f' % (result))
+        if result:
+            print('co2 %.2f' % (result))
 
 
 def init():
     global i2c, uart
-    i2c = common.create_i2c(pins.S2_SCL_BUF, pins.S2_SDA_BUF)
+    i2c = common.create_i2c(pins.S2_SCL_BUF_I2C_2, pins.S2_SDA_BUF_I2C_2)
     print("I2C devices:")
     for device in i2c.scan():
         print("  0x%02X" % (device))
-    #https://forum.micropython.org/viewtopic.php?t=6484
-    #uart = common.create_uart(2, pins.S2_RS232_RX, pins.S2_RS232_TX)
+    uart = common.create_uart(2)
     radar_init()
     env_sensor_init()
     light_sensor_init()
-    #co2_sensor_init()
+    co2_sensor_init()
 
 
 def loop():
     check_radar()
     check_env()
     check_light_sensor()
-    #check_co2_sensor()
+    check_co2_sensor()

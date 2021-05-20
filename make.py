@@ -9,7 +9,7 @@ import typer
 
 
 options = {
-    "DEVICE_PATH": "/dev/ttyACM1",
+    "DEVICE_PATH": "/dev/ttyACM0",
     "BUFFER_SIZE": 512,
     "VERBOSE": False
 }
@@ -101,6 +101,15 @@ def shell():
 @app.command()
 def flash():
     cmd = "%s rsync ./src /pyboard/flash/" % (get_base_command())
+    lines = run_bash_cmd(cmd)
+    for line in lines:
+        if "timed out or error" in line:
+            print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
+
+
+@app.command()
+def flash_force():
+    cmd = "%s shell cp ./src/* /pyboard/flash/" % (get_base_command())
     lines = run_bash_cmd(cmd)
     for line in lines:
         if "timed out or error" in line:
