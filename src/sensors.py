@@ -17,6 +17,9 @@ light_sensor_timeout = 5000
 co2_sensor = None
 co2_sensor_timestamp = 0
 co2_sensor_timeout = 2000
+signal_led_pin = None
+signal_led_timestamp = 0
+signal_led_timeout = 3000
 
 
 def radar_init():
@@ -36,6 +39,11 @@ def light_sensor_init():
 def co2_sensor_init():
     global co2_sensor
     co2_sensor = mhz19b.MHZ19BSensor(uart)
+
+
+def signal_led_init():
+    global signal_led_pin
+    signal_led_pin = common.create_output(pins.S2_SIGNAL_LED)
 
 
 def check_radar():
@@ -71,6 +79,13 @@ def check_co2_sensor():
             print('co2 %.2f' % (result))
 
 
+def check_signal_led():
+    global signal_led_timestamp
+    if common.millis_passed(signal_led_timestamp) >= signal_led_timeout:
+        signal_led_timestamp = common.get_millis()
+        signal_led_pin.value(not signal_led_pin.value())
+    
+
 def init():
     global i2c, uart
     i2c = common.create_i2c(pins.S2_SCL_BUF_I2C_2, pins.S2_SDA_BUF_I2C_2)
@@ -82,6 +97,7 @@ def init():
     env_sensor_init()
     light_sensor_init()
     co2_sensor_init()
+    signal_led_init()
 
 
 def loop():
@@ -89,3 +105,4 @@ def loop():
     check_env()
     check_light_sensor()
     check_co2_sensor()
+    check_signal_led()
