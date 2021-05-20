@@ -6,6 +6,7 @@ import pty
 from subprocess import Popen
 from time import time, sleep
 import typer
+import glob
 
 
 options = {
@@ -109,7 +110,8 @@ def flash():
 
 @app.command()
 def flash_force():
-    cmd = "%s shell cp ./src/* /pyboard/flash/" % (get_base_command())
+    files = glob.glob("./src/*.py")
+    cmd = "%s cp %s /pyboard/flash/" % (get_base_command(), " ".join(files))
     lines = run_bash_cmd(cmd)
     for line in lines:
         if "timed out or error" in line:
