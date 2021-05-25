@@ -58,10 +58,19 @@ def create_i2c(pin_scl, pin_sda):
     return SoftI2C(pin_scl, pin_sda)
 
 
-def test_pin(pin_name):
-    led = create_output(pin_name)
-    led.off()
+def test_out_pin(pin_name):
+    outpin = create_output(pin_name)
+    outpin.off()
     sleep(0.2)
-    led.on()
+    outpin.on()
     sleep(2)
-    led.off()
+    outpin.off()
+
+def test_in_pin(pin_name, pullup=None):
+    inpin = create_input(pin_name, pullup=pullup)
+    state = None
+    while True:
+        new_state = inpin.value()
+        if new_state != state:
+            state = new_state
+            print(state)
