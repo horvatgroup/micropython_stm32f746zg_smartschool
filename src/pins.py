@@ -1,3 +1,4 @@
+# UART3 is used for STDIO
 S1_SIGNAL_LED = 'G1'
 S1_SCL_BUF_I2C_1 = 'B8'
 S1_SDA_BUF_I2C_1 = 'B9'
