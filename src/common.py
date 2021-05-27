@@ -58,13 +58,22 @@ def create_i2c(pin_scl, pin_sda):
     return SoftI2C(pin_scl, pin_sda)
 
 
-def test_out_pin(pin_name):
+def test_out_pin(pin_name, reversed=False):
     outpin = create_output(pin_name)
-    outpin.off()
+    if reversed:
+        outpin.on()
+    else:
+        outpin.off()
     sleep(0.2)
-    outpin.on()
+    if reversed:
+        outpin.off()
+    else:
+        outpin.on()
     sleep(2)
-    outpin.off()
+    if reversed:
+        outpin.on()
+    else:
+        outpin.off()
 
 def test_in_pin(pin_name, pullup=None):
     inpin = create_input(pin_name, pullup=pullup)
@@ -74,3 +83,33 @@ def test_in_pin(pin_name, pullup=None):
         if new_state != state:
             state = new_state
             print(state)
+
+
+def test_button_board(pin_sw, pin_led_gb, pin_led_r):
+    import pins
+    inpin = create_input(pin_sw)
+    led_gb = create_output(pin_led_gb)
+    led_r = create_output(pin_led_r)
+    state = None
+    led_state = 0
+    while True:
+        new_state = inpin.value()
+        if new_state != state:
+            state = new_state
+            if (state):
+                led_state += 1
+                if led_state == 4:
+                    led_state = 0
+                print("state %d" % (led_state))
+            if led_state == 0:
+                led_r.on()
+                led_gb.on()
+            elif led_state == 1:
+                led_r.off()
+                led_gb.on()
+            elif led_state == 2:
+                led_r.on()
+                led_gb.off()
+            elif led_state == 3:
+                led_r.off()
+                led_gb.off()

@@ -127,13 +127,13 @@ class SignalLed:
 
 def init():
     global sensors
-    s1_i2c = common.create_i2c(pins.S1_SCL_BUF_I2C_1, pins.S1_SDA_BUF_I2C_1)
-    #s1_uart = common.create_uart(pins.S1_UART5)
+    #s1_i2c = common.create_i2c(pins.S1_SCL_BUF_I2C_1, pins.S1_SDA_BUF_I2C_1)
+    s1_uart = common.create_uart(pins.S1_UART5)
     #sensors.append(Radar(pins.S1_RADAR_SIG, on_change=lambda x: print("S1:", x)))
     #sensors.append(Environment(s1_i2c, on_change=lambda x: print("S1:", x)))
     #sensors.append(Light(s1_i2c, on_change=lambda x: print("S1:", x)))
-    #sensors.append(Co2(s1_uart, on_change=lambda x: print("S1:", x)))
-    sensors.append(SignalLed(pins.S1_SIGNAL_LED))
+    sensors.append(Co2(s1_uart, on_change=lambda x: print("S1:", x)))
+    #sensors.append(SignalLed(pins.S1_SIGNAL_LED))
 
     #s2_i2c = common.create_i2c(pins.S2_SCL_BUF_I2C_2, pins.S2_SDA_BUF_I2C_2)
     #s2_uart = common.create_uart(pins.S2_UART2)
