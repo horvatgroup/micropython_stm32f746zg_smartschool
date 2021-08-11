@@ -18,9 +18,9 @@ def dump_func(pexit=False, timing=False, showarg=False):
             if showarg:
                 enter_string += ", <args[%s%s]>" % (args, kwargs)
             print(enter_string)
+            timestamp = get_millis()
             if timing:
                 pexit_local = True
-                timestamp = get_millis()
             response = f(*args, **kwargs)
             exit_string = "%s <exit>" % (f.__name__)
             if timing:
@@ -28,7 +28,9 @@ def dump_func(pexit=False, timing=False, showarg=False):
             if pexit or pexit_local:
                 print(exit_string)
             return response
+
         return wrapped
+
     return inner_decorator
 
 
@@ -75,6 +77,7 @@ def test_out_pin(pin_name, reversed=False):
     else:
         outpin.off()
 
+
 def test_in_pin(pin_name, pullup=None):
     inpin = create_input(pin_name, pullup=pullup)
     state = None
@@ -86,7 +89,7 @@ def test_in_pin(pin_name, pullup=None):
 
 
 def test_button_board(pin_sw, pin_led_gb, pin_led_r):
-    import pins
+    import common_pins
     inpin = create_input(pin_sw)
     led_gb = create_output(pin_led_gb)
     led_r = create_output(pin_led_r)

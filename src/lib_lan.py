@@ -1,5 +1,5 @@
 import network
-from umqtt_simple import MQTTClient
+from lib_umqtt_simple import MQTTClient
 import ubinascii
 import machine
 

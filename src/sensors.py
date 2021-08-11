@@ -1,8 +1,8 @@
 import common
-import bme680
-import pins
-import bh1750fvi
-import mhz19b
+import driver_bme680
+import common_pins
+import driver_bh1750fvi
+import driver_mhz19b
 
 sensors = []
 
@@ -13,7 +13,7 @@ class Radar:
         self.timestamp = 0
         self.timeout = timeout
         self.on_change = on_change
-        self.data = 2 # data is binary
+        self.data = 2  # data is binary
 
     def read(self):
         data = self.input.value()
@@ -30,7 +30,7 @@ class Radar:
 
 class Environment:
     def __init__(self, i2c, timeout=3000, on_change=None):
-        self.sensor = bme680.BME680_I2C(i2c)
+        self.sensor = driver_bme680.BME680_I2C(i2c)
         self.timestamp = 0
         self.timeout = timeout
         self.on_change = on_change
@@ -72,7 +72,7 @@ class Light:
         self.diff = 1
 
     def read(self):
-        data = bh1750fvi.sample(self.i2c)
+        data = driver_bh1750fvi.sample(self.i2c)
         diff = abs(data - self.data)
         if diff != 0 and diff > self.diff:
             self.data = data
@@ -87,7 +87,7 @@ class Light:
 
 class Co2:
     def __init__(self, uart, timeout=3000, on_change=None):
-        self.sensor = mhz19b.MHZ19BSensor(uart)
+        self.sensor = driver_mhz19b.MHZ19BSensor(uart)
         self.timestamp = 0
         self.timeout = timeout
         self.on_change = on_change
@@ -127,27 +127,33 @@ class SignalLed:
 
 def init():
     global sensors
-    #s1_i2c = common.create_i2c(pins.S1_SCL_BUF_I2C_1, pins.S1_SDA_BUF_I2C_1)
-    s1_uart = common.create_uart(pins.S1_UART5)
-    #sensors.append(Radar(pins.S1_RADAR_SIG, on_change=lambda x: print("S1:", x)))
-    #sensors.append(Environment(s1_i2c, on_change=lambda x: print("S1:", x)))
-    #sensors.append(Light(s1_i2c, on_change=lambda x: print("S1:", x)))
-    sensors.append(Co2(s1_uart, on_change=lambda x: print("S1:", x)))
-    #sensors.append(SignalLed(pins.S1_SIGNAL_LED))
+    # s1_i2c = common.create_i2c(common_pins.S1_SCL_BUF_I2C_1.id, common_pins.S1_SDA_BUF_I2C_1.id)
+    # s1_uart = common.create_uart(common_pins.S1_UART5.id)
+    # sensors.append(Radar(common_pins.S1_RADAR_SIG.id, on_change=lambda x: print("S1:", x)))
+    # sensors.append(Environment(s1_i2c, on_change=lambda x: print("S1:", x)))
+    # sensors.append(Light(s1_i2c, on_change=lambda x: print("S1:", x)))
+    # sensors.append(Co2(s1_uart, on_change=lambda x: print("S1:", x)))
+    # sensors.append(SignalLed(common_pins.S1_SIGNAL_LED.id))
 
-    #s2_i2c = common.create_i2c(pins.S2_SCL_BUF_I2C_2, pins.S2_SDA_BUF_I2C_2)
-    #s2_uart = common.create_uart(pins.S2_UART2)
-    #sensors.append(Radar(pins.S2_RADAR_SIG, on_change=lambda x: print("S2:", x)))
-    #sensors.append(Environment(s2_i2c, on_change=lambda x: print("S2:", x)))
-    #sensors.append(Light(s2_i2c, on_change=lambda x: print("S2:", x)))
-    #sensors.append(Co2(s2_uart, on_change=lambda x: print("S2:", x)))
-    #sensors.append(SignalLed(pins.S2_SIGNAL_LED))
+    s2_i2c = common.create_i2c(common_pins.S2_SCL_BUF_I2C_2.id, common_pins.S2_SDA_BUF_I2C_2.id)
+    s2_uart = common.create_uart(common_pins.S2_UART2.id)
+    sensors.append(Radar(common_pins.S2_RADAR_SIG.id, on_change=lambda x: print("S2:", x)))
+    sensors.append(Environment(s2_i2c, on_change=lambda x: print("S2:", x)))
+    sensors.append(Light(s2_i2c, on_change=lambda x: print("S2:", x)))
+    sensors.append(Co2(s2_uart, on_change=lambda x: print("S2:", x)))
+    sensors.append(SignalLed(common_pins.S2_SIGNAL_LED.id))
 
 
 def loop():
     for sensor in sensors:
         sensor.loop()
-        
+
+
+def test():
+    init()
+    while True:
+        loop()
+
 # S1: {'radar': 1}
 # S1: {'temperature': 26.88586}
 # S1: {'pressure': 996.904}
