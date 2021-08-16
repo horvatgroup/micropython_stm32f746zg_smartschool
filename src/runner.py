@@ -1,5 +1,7 @@
 import buttons
-
+import lib_lan
+import sync_data
+import buttons
 
 def init():
     buttons.init()

@@ -98,3 +98,18 @@ def test_leds():
         time.sleep_ms(1000)
         led.output.off()
         time.sleep_ms(1000)
+
+
+def set_state_by_name(name, state):
+    for relay in relays:
+        if relay.name == name:
+            if state:
+                relay.output.on()
+            else:
+                relay.output.off()
+    for led in leds:
+        if led.name == name:
+            if state:
+                led.output.on()
+            else:
+                led.output.off()

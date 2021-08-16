@@ -3,6 +3,7 @@ import driver_bme680
 import common_pins
 import driver_bh1750fvi
 import driver_mhz19b
+import sync_data
 
 sensors = []
 
@@ -30,7 +31,8 @@ class Radar:
 
 class Environment:
     def __init__(self, i2c, timeout=3000, on_change=None):
-        self.sensor = driver_bme680.BME680_I2C(i2c)
+        self.i2c = i2c
+        self.sensor = None
         self.timestamp = 0
         self.timeout = timeout
         self.on_change = on_change
@@ -47,14 +49,29 @@ class Environment:
         self.diff['altitude'] = 0.1
         self.diff['humidity'] = 0.1
 
+    def get_sensor(self):
+        if self.sensor != None:
+            return self.sensor
+        else:
+            try:
+                self.sensor = driver_bme680.BME680_I2C(self.i2c)
+                return self.sensor
+            except:
+                self.sensor = None
+                return None
+
     def read(self):
-        data = self.sensor.read()
-        for key in data:
-            diff = abs(data[key] - self.data[key])
-            if diff != 0 and diff > self.diff[key]:
-                self.data[key] = data[key]
-                if self.on_change:
-                    self.on_change({key: self.data[key]})
+        if self.get_sensor() != None:
+            try:
+                data = self.get_sensor().read()
+                for key in data:
+                    diff = abs(data[key] - self.data[key])
+                    if diff != 0 and diff > self.diff[key]:
+                        self.data[key] = data[key]
+                        if self.on_change:
+                            self.on_change({key: self.data[key]})
+            except:
+                self.sensor = None
 
     def loop(self):
         if common.millis_passed(self.timestamp) >= self.timeout:
@@ -72,12 +89,15 @@ class Light:
         self.diff = 1
 
     def read(self):
-        data = driver_bh1750fvi.sample(self.i2c)
-        diff = abs(data - self.data)
-        if diff != 0 and diff > self.diff:
-            self.data = data
-            if self.on_change:
-                self.on_change({"light": self.data})
+        try:
+            data = driver_bh1750fvi.sample(self.i2c)
+            diff = abs(data - self.data)
+            if diff != 0 and diff > self.diff:
+                self.data = data
+                if self.on_change:
+                    self.on_change({"light": self.data})
+        except:
+            pass
 
     def loop(self):
         if common.millis_passed(self.timestamp) >= self.timeout:
@@ -87,61 +107,70 @@ class Light:
 
 class Co2:
     def __init__(self, uart, timeout=3000, on_change=None):
-        self.sensor = driver_mhz19b.MHZ19BSensor(uart)
+        self.uart = uart
+        self.sensor = None
         self.timestamp = 0
         self.timeout = timeout
         self.on_change = on_change
         self.data = 0
         self.diff = 1
 
+    def get_sensor(self):
+        if self.sensor != None:
+            return self.sensor
+        else:
+            try:
+                self.sensor = driver_mhz19b.MHZ19BSensor(self.uart)
+                return self.sensor
+            except:
+                self.sensor = None
+                return None
+
     def read(self):
-        data = self.sensor.measure()
-        if data:
-            diff = abs(data - self.data)
-            if diff != 0 and diff > self.diff:
-                self.data = data
-                if self.on_change:
-                    self.on_change({"co2": self.data})
+        if self.get_sensor() != None:
+            try:
+                data = self.get_sensor().measure()
+                if data:
+                    diff = abs(data - self.data)
+                    if diff != 0 and diff > self.diff:
+                        self.data = data
+                        if self.on_change:
+                            self.on_change({"co2": self.data})
+            except:
+                self.sensor = None
 
     def loop(self):
         if common.millis_passed(self.timestamp) >= self.timeout:
             self.timestamp = common.get_millis()
             self.read()
 
+    def is_available(self):
+        return True
 
-class SignalLed:
-    def __init__(self, pin, timeout=3000, default_state=False):
-        self.output = common.create_output(pin)
-        self.output.value(False)
-        self.timestamp = 0
-        self.timeout = timeout
 
-    def set_state(self, state):
-        self.output = state
-
-    def loop(self):
-        if common.millis_passed(self.timestamp) >= self.timeout:
-            self.timestamp = common.get_millis()
-            self.output.value(not self.output.value())
+def publish_results(sensor_board, data):
+    print("%s: %s" % (sensor_board, str(data)))
+    for key in data:
+        sync_data_name = sensor_board + "_" + key
+        sync_data_value = data[key]
+        sync_data.set_local_data_out(sync_data_name, sync_data_value)
 
 
 def init():
     global sensors
-    # s1_i2c = common.create_i2c(common_pins.S1_SCL_BUF_I2C_1.id, common_pins.S1_SDA_BUF_I2C_1.id)
-    # s1_uart = common.create_uart(common_pins.S1_UART5.id)
-    # sensors.append(Radar(common_pins.S1_RADAR_SIG.id, on_change=lambda x: print("S1:", x)))
-    # sensors.append(Environment(s1_i2c, on_change=lambda x: print("S1:", x)))
-    # sensors.append(Light(s1_i2c, on_change=lambda x: print("S1:", x)))
-    # sensors.append(Co2(s1_uart, on_change=lambda x: print("S1:", x)))
-    # sensors.append(SignalLed(common_pins.S1_SIGNAL_LED.id))
+    s1_i2c = common.create_i2c(common_pins.S1_SCL_BUF_I2C_1.id, common_pins.S1_SDA_BUF_I2C_1.id)
+    s1_uart = common.create_uart(common_pins.S1_UART5.id)
+    sensors.append(Radar(common_pins.S1_RADAR_SIG.id, on_change=lambda x: publish_results("S1", x)))
+    sensors.append(Environment(s1_i2c, on_change=lambda x: publish_results("S1", x)))
+    sensors.append(Light(s1_i2c, on_change=lambda x: publish_results("S1", x)))
+    sensors.append(Co2(s1_uart, on_change=lambda x: publish_results("S1", x)))
 
     s2_i2c = common.create_i2c(common_pins.S2_SCL_BUF_I2C_2.id, common_pins.S2_SDA_BUF_I2C_2.id)
     s2_uart = common.create_uart(common_pins.S2_UART2.id)
-    sensors.append(Radar(common_pins.S2_RADAR_SIG.id, on_change=lambda x: print("S2:", x)))
-    sensors.append(Environment(s2_i2c, on_change=lambda x: print("S2:", x)))
-    sensors.append(Light(s2_i2c, on_change=lambda x: print("S2:", x)))
-    sensors.append(Co2(s2_uart, on_change=lambda x: print("S2:", x)))
-    sensors.append(SignalLed(common_pins.S2_SIGNAL_LED.id))
+    sensors.append(Radar(common_pins.S2_RADAR_SIG.id, on_change=lambda x: publish_results("S2", x)))
+    sensors.append(Environment(s2_i2c, on_change=lambda x: publish_results("S2", x)))
+    sensors.append(Light(s2_i2c, on_change=lambda x: publish_results("S2", x)))
+    sensors.append(Co2(s2_uart, on_change=lambda x: publish_results("S2", x)))
 
 
 def loop():

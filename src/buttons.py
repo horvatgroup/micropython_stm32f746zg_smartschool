@@ -1,5 +1,6 @@
 import common
 import common_pins
+import sync_data
 
 
 class Button:
@@ -12,7 +13,8 @@ class Button:
         state = self.input.value()
         if state != self.state:
             self.state = state
-            print("State change for %s to %d" % (self.name, self.state))
+            #print("State change for %s to %d" % (self.name, self.state))
+            sync_data.set_local_data_out(self.name, self.state)
 
 
 button_pins = [common_pins.ONBOARD_BUTTON,
