@@ -6,10 +6,23 @@ import time
 
 
 class Led:
-    def __init__(self, id, name):
+    def __init__(self, id, name, active_high=False):
         self.output = common.create_output(id)
-        self.output.off()
+        self.active_high = active_high
+        self.set_state(0)
         self.name = name
+
+    def set_state(self, state):
+        if self.active_high:
+            if state:
+                self.output.off()
+            else:
+                self.output.on()
+        else:
+            if state:
+                self.output.on()
+            else:
+                self.output.off()
 
 
 relay_pins = [
@@ -59,7 +72,7 @@ def init_relays():
 
 def init_leds():
     for pin in led_pins:
-        leds.append(Led(pin.id, pin.name))
+        leds.append(Led(pin.id, pin.name, True))
 
 
 def init():
@@ -82,9 +95,9 @@ def test_relays():
     init_relays()
     for relay in relays:
         print("Testing %s" % (relay.name))
-        relay.output.on()
+        relay.set_state(1)
         time.sleep_ms(1000)
-        relay.output.off()
+        relay.set_state(0)
         time.sleep_ms(1000)
 
 
@@ -94,22 +107,16 @@ def test_leds():
     init_leds()
     for led in leds:
         print("Testing %s" % (led.name))
-        led.output.on()
+        led.set_state(1)
         time.sleep_ms(1000)
-        led.output.off()
+        led.set_state(0)
         time.sleep_ms(1000)
 
 
 def set_state_by_name(name, state):
     for relay in relays:
         if relay.name == name:
-            if state:
-                relay.output.on()
-            else:
-                relay.output.off()
+            relay.set_state(state)
     for led in leds:
         if led.name == name:
-            if state:
-                led.output.on()
-            else:
-                led.output.off()
+            led.set_state(state)
