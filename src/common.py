@@ -52,6 +52,12 @@ def create_input(pin, pullup=None):
         return Pin(pin, Pin.IN, Pin.PULL_DOWN)
 
 
+def create_interrupt(pin, cb=None):
+    interrupt_pin = create_input(pin.id)
+    interrupt_pin.irq(cb)
+    return interrupt_pin
+
+
 def create_uart(instance, baud=9600):
     return UART(instance, baud)
 
