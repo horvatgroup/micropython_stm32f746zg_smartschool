@@ -3,7 +3,6 @@ import driver_bme680
 import common_pins
 import driver_bh1750fvi
 import driver_mhz19b
-import sync_data
 
 sensors = []
 
@@ -149,14 +148,11 @@ class Co2:
 
 
 def publish_results(sensor_board, data):
-    print("%s: %s" % (sensor_board, str(data)))
-    for key in data:
-        sync_data_name = sensor_board + "_" + key
-        sync_data_value = data[key]
-        sync_data.set_local_data_out(sync_data_name, sync_data_value)
+    print("[SENSORS]: %s -> %s" % (sensor_board, str(data)))
 
 
 def init():
+    print("[SENSORS]: init")
     global sensors
     s1_i2c = common.create_i2c(common_pins.S1_SCL_BUF_I2C_1.id, common_pins.S1_SDA_BUF_I2C_1.id)
     s1_uart = common.create_uart(common_pins.S1_UART5.id)
@@ -179,6 +175,7 @@ def loop():
 
 
 def test():
+    print("[SENSORS]: test")
     init()
     while True:
         loop()

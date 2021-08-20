@@ -2,6 +2,7 @@ import sys
 import uselect
 import leds
 import buttons
+import sensors
 
 spoll = None
 input_buffer = []
@@ -84,9 +85,7 @@ def parse_leds(cmd):
 
 
 def parse_buttons(cmd):
-    if cmd[1] == "1":
-        pass
-    elif cmd[1] == "init":
+    if cmd[1] == "init":
         buttons.init()
     elif cmd[1] == "loop":
         set_loop_cb("buttons", buttons.loop, int(cmd[2]))
@@ -96,11 +95,22 @@ def parse_buttons(cmd):
         print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
 
 
+def parse_sensors(cmd):
+    if cmd[1] == "init":
+        sensors.init()
+    elif cmd[1] == "loop":
+        set_loop_cb("sensors", sensors.loop, int(cmd[2]))
+    else:
+        print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
+
+
 def parse_input(cmd):
     if cmd[0] == "leds":
         parse_leds(cmd)
     elif cmd[0] == "buttons":
         parse_buttons(cmd)
+    elif cmd[0] == "sensors":
+        parse_sensors(cmd)
     else:
         print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
 
