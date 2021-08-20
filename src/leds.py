@@ -72,10 +72,14 @@ def init_relays():
 
 def init_leds():
     for pin in led_pins:
-        leds.append(Led(pin.id, pin.name, True))
+        if "ONBOARD" in pin.name:
+            leds.append(Led(pin.id, pin.name))
+        else:
+            leds.append(Led(pin.id, pin.name, True))
 
 
 def init():
+    print("[LEDS]: init")
     init_relays()
     init_leds()
 
@@ -85,6 +89,7 @@ def loop():
 
 
 def test():
+    print("[LEDS]: test")
     init()
     loop()
 
@@ -94,7 +99,7 @@ def test_relays():
     relays = []
     init_relays()
     for relay in relays:
-        print("Testing %s" % (relay.name))
+        print("[LEDS]: testing %s" % (relay.name))
         relay.set_state(1)
         time.sleep_ms(1000)
         relay.set_state(0)
@@ -106,7 +111,7 @@ def test_leds():
     leds = []
     init_leds()
     for led in leds:
-        print("Testing %s" % (led.name))
+        print("[LEDS]: testing %s" % (led.name))
         led.set_state(1)
         time.sleep_ms(1000)
         led.set_state(0)
@@ -114,6 +119,7 @@ def test_leds():
 
 
 def set_state_by_name(name, state):
+    print("[LEDS]: set_state_by_name(%s, %s)" % (name, state))
     for relay in relays:
         if relay.name == name:
             relay.set_state(state)

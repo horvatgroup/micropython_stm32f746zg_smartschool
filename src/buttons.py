@@ -1,6 +1,7 @@
 import common
 import common_pins
-import sync_data
+
+on_state_change_cb = None
 
 
 class Button:
@@ -13,8 +14,9 @@ class Button:
         state = self.input.value()
         if state != self.state:
             self.state = state
-            #print("State change for %s to %d" % (self.name, self.state))
-            sync_data.set_local_data_out(self.name, self.state)
+            print("[BUTTONS]: %s -> %d" % (self.name, self.state))
+            if on_state_change_cb:
+                on_state_change_cb(self.name, self.state)
 
 
 button_pins = [common_pins.ONBOARD_BUTTON,
@@ -31,7 +33,14 @@ button_pins = [common_pins.ONBOARD_BUTTON,
 buttons = []
 
 
+def register_on_state_change_callback(cb):
+    global on_state_change_cb
+    print("[BUTTONS]: register on state change cb")
+    on_state_change_cb = cb
+
+
 def init():
+    print("[BUTTONS]: init")
     for pin in button_pins:
         buttons.append(Button(pin))
 

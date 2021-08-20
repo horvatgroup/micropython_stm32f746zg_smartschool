@@ -1,15 +1,12 @@
-import buttons
-import lib_lan
-import sync_data
-import buttons
+import cli
 
 def init():
-    buttons.init()
+    cli.init()
 
 
 def loop():
     while True:
-        buttons.loop()
+        cli.loop()
 
 
 def run():
