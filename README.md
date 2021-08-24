@@ -46,3 +46,10 @@ It is also possible to convert `firmware.hex` to `.bin` using the next command `
 ## Enhancements
 ### Adding missing pins
 If pins are missing refer to this page on [Micropython's ISSUE page](https://github.com/micropython/micropython/issues/3715#issuecomment-832341132)
+
+## Testing
+### mosquitto
+- install `sudo pacman -S mosquitto`
+- start `sudo systemctl start mosquitto`
+- subscriber `mosquitto_sub -t home/frontgarden/doorbell`
+- publisher `mosquitto_pub -t home/frontgarden/doorbell -m "test message"`
