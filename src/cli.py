@@ -3,6 +3,7 @@ import uselect
 import leds
 import buttons
 import sensors
+import lan
 
 spoll = None
 input_buffer = []
@@ -104,6 +105,19 @@ def parse_sensors(cmd):
         print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
 
 
+def parse_lan(cmd):
+    if cmd[1] == "init":
+        lan.init()
+    elif cmd[1] == "check":
+        lan.check_connection()
+    elif cmd[1] == "print":
+        lan.print_ip()
+    elif cmd[1] == "status":
+        lan.print_status()
+    elif cmd[1] == "loop":
+        set_loop_cb("lan", lan.loop, int(cmd[2]))
+
+
 def parse_input(cmd):
     if cmd[0] == "leds":
         parse_leds(cmd)
@@ -111,18 +125,21 @@ def parse_input(cmd):
         parse_buttons(cmd)
     elif cmd[0] == "sensors":
         parse_sensors(cmd)
+    elif cmd[0] == "lan":
+        parse_lan(cmd)
     else:
         print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
 
 
 def loop():
-    byte = read_from_usb()
-    if byte:
-        cmd = handle_input(byte)
-        if cmd:
-            parse_input(cmd)
-    for loop_cb in loop_cbs:
-        loop_cb.loop()
+    bytes = read_from_usb()
+    if bytes:
+        for byte in bytes:
+            cmd = handle_input(byte)
+            if cmd:
+                parse_input(cmd)
+            for loop_cb in loop_cbs:
+                loop_cb.loop()
 
 
 def test():
