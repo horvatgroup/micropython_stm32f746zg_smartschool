@@ -50,6 +50,7 @@ If pins are missing refer to this page on [Micropython's ISSUE page](https://git
 ## Testing
 ### mosquitto
 - install `sudo pacman -S mosquitto`
+- add `listener 1883` and `allow_anonymous true` to `/etc/mosquitto/mosquitto.conf`
 - start `sudo systemctl start mosquitto`
 - subscriber `mosquitto_sub -t home/frontgarden/doorbell`
 - publisher `mosquitto_pub -t home/frontgarden/doorbell -m "test message"`

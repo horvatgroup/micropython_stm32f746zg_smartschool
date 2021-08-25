@@ -10,7 +10,7 @@ from common import get_millis, millis_passed, dump_func
 
 CLIENT_ID = ubinascii.hexlify(machine.unique_id())
 SERVER = "192.168.88.76"
-PORT = 16200
+PORT = 1883
 
 mac = ""
 lan = None
@@ -50,7 +50,7 @@ def test_connection_with_gateway():
 
 
 def sub_cb(topic, msg):
-    print((topic, msg))
+    print("[LAN]: mqtt sub %s, %s " % (topic, msg))
 
 
 @dump_func(timing=True)
