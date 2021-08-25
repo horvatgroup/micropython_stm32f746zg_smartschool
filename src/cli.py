@@ -109,11 +109,11 @@ def parse_lan(cmd):
     if cmd[1] == "init":
         lan.init()
     elif cmd[1] == "check":
-        lan.check_connection()
-    elif cmd[1] == "print":
-        lan.print_ip()
+        lan.is_connection_ready()
     elif cmd[1] == "status":
         lan.print_status()
+    elif cmd[1] == "ping":
+        lan.ping()
     elif cmd[1] == "loop":
         set_loop_cb("lan", lan.loop, int(cmd[2]))
 

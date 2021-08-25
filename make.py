@@ -8,7 +8,6 @@ from time import time, sleep
 import typer
 import glob
 
-
 options = {
     "DEVICE_PATH": "/dev/ttyACM0",
     "BUFFER_SIZE": 512,
@@ -80,8 +79,13 @@ def run_bash_cmd(cmd, echo=False, interaction={}, return_lines=True, return_code
         return lines
 
 
-def get_base_command():
+def get_rshell_base_command():
     return "rshell -p %s --buffer-size %d" % (options["DEVICE_PATH"], options["BUFFER_SIZE"])
+
+
+def get_mpremote_base_command():
+    # return "mpremote connect %s" % (options["DEVICE_PATH"])
+    return "mpremote"
 
 
 app = typer.Typer(help="Awesome CLI micropython.")
@@ -89,19 +93,19 @@ app = typer.Typer(help="Awesome CLI micropython.")
 
 @app.command()
 def repl():
-    cmd = "%s repl" % (get_base_command())
+    cmd = "%s repl" % (get_rshell_base_command())
     os.system(cmd)
 
 
 @app.command()
 def shell():
-    cmd = "%s" % (get_base_command())
+    cmd = "%s" % (get_rshell_base_command())
     os.system(cmd)
 
 
 @app.command()
 def flash():
-    cmd = "%s rsync ./src /pyboard/flash/" % (get_base_command())
+    cmd = "%s rsync ./src /pyboard/flash/" % (get_rshell_base_command())
     lines = run_bash_cmd(cmd)
     for line in lines:
         if "timed out or error" in line:
@@ -111,12 +115,23 @@ def flash():
 @app.command()
 def flash_force():
     files = glob.glob("./src/*.py")
-    cmd = "%s cp %s /pyboard/flash/" % (get_base_command(), " ".join(files))
+    cmd = "%s fs cp %s :" % (get_mpremote_base_command(), " ".join(files))
     lines = run_bash_cmd(cmd)
     for line in lines:
         if "timed out or error" in line:
             print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
 
+@app.command()
+def flash_rm():
+    cmd = "%s fs ls" % (get_mpremote_base_command())
+    files = [line.strip().split(" ")[1] for line in run_bash_cmd(cmd)][1:]
+    for f in files:
+        cmd = "%s fs rm :%s" % (get_mpremote_base_command(), f)
+        lines = run_bash_cmd(cmd)
+        for line in lines:
+            if "Traceback" in line:
+                print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
+                return
 
 @app.command()
 def flash_micropython():

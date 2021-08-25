@@ -2,6 +2,9 @@ import network
 from lib_umqtt_simple import MQTTClient
 import ubinascii
 import machine
+import socket
+
+# https://docs.openmv.io/library/network.LAN.html
 
 from common import get_millis, millis_passed, dump_func
 
@@ -9,6 +12,7 @@ CLIENT_ID = ubinascii.hexlify(machine.unique_id())
 SERVER = "192.168.88.76"
 PORT = 16200
 
+mac = ""
 lan = None
 client = None
 
@@ -17,7 +21,6 @@ incoming_messages = []
 
 
 def http_get(url):
-    import socket
     _, _, host, path = url.split('/', 3)
     addr = socket.getaddrinfo(host, 80)[0][-1]
     s = socket.socket()
@@ -30,6 +33,20 @@ def http_get(url):
         else:
             break
     s.close()
+
+
+def test_connection_with_gateway():
+    print("[LAN]: test connection with gateway")
+    gateway = lan.ifconfig()[2]
+    try:
+        addr = socket.getaddrinfo(gateway, 80)[0][-1]
+        s = socket.socket()
+        s.connect(addr)
+        s.close()
+        return True
+    except Exception as e:
+        print("[LAN]: ERROR %s" % e)
+        return False
 
 
 def sub_cb(topic, msg):
@@ -56,75 +73,66 @@ def send_mqtt_uptime():
         client.publish(TOPIC, "uptime %d".encode() % (timestamp))
 
 
-is_active = False
-has_ip = False
-has_internet = False
+def set_static_ip():
+    print("[LAN]: set static ip")
+    lan.ifconfig(('192.168.88.17', '255.255.255.0', '192.168.88.1', '8.8.8.8'))
 
 
-def reset():
-    global is_active, has_ip, has_internet
-    is_active = False
-    has_ip = False
-    has_internet = False
-
-
-def set_active():
-    global is_active
-    print("[LAN]: set active")
-    try:
-        lan.active(True)
-        is_active = True
-    except:
-        print("[LAN]: ERROR: cant activate network")
-        reset()
-
-
-def get_ip():
-    global has_ip
-    print("[LAN]: get ip")
-    try:
-        lan.ifconfig('dhcp')
-        has_ip = True
-    except:
-        print("[LAN]: ERROR: cant get ip")
-        reset()
-
-
-def print_ip():
-    print("[LAN]: print ip")
+def print_status():
+    print("[LAN]: print status")
+    print("mac", mac)
+    print("status", lan.status())
+    print("active", lan.active())
+    print("isconnected", lan.isconnected())
     result = lan.ifconfig()
     if result:
         print(result)
 
-def print_status():
-    print("[LAN]: print status")
-    print(lan.status())
 
+def ping():
+    uping.ping('192.168.88.1')
+
+
+# Check internet connectivity by sending DNS lookup to Google's 8.8.8.8
 def check_internet():
-    global has_internet
-    print("[LAN]: test http get")
+    print("[LAN]: check_internet")
     http_get('http://micropython.org/ks/test.html')
-    has_internet = True
 
 
-def check_connection():
-    if not is_active:
-        set_active()
-    if is_active and not has_ip:
-        get_ip()
-    if is_active and has_ip and not has_internet:
-        check_internet()
+def is_connection_ready():
+    status = lan.status()
+    if status == 0:
+        print("[LAN]: Link Down")
+    if status == 1:
+        print("[LAN]: Link Join")
+        try:
+            lan.active(True)
+        except Exception as e:
+            print("[LAN]: ERROR %s" % (e))
+    elif status == 2:
+        print("[LAN]: Link No-IP")
+        try:
+            lan.ifconfig('dhcp')
+        except Exception as e:
+            print("[LAN]: ERROR %s" % (e))
+            set_static_ip()
+    elif status == 3:
+        print("[LAN]: Link Up")
+        return test_connection_with_gateway()
+    return False
 
 
 def init():
     print("[LAN]: init")
-    global lan
+    global lan, mac
     lan = network.LAN()
+    mac = "".join(['{:02X}'.format(x) for x in lan.config('mac')])
+    # lan.config(trace=4)
 
 
 def check():
     print("[LAN]: check connection")
-    check_connection()
+    is_connection_ready()
 
 
 def loop():
