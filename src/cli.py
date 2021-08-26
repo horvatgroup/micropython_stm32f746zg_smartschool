@@ -107,15 +107,15 @@ def parse_sensors(cmd):
 
 def parse_lan(cmd):
     if cmd[1] == "init":
-        lan.init()
+        eth.init()
     elif cmd[1] == "check":
-        lan.is_connection_ready()
+        eth.is_connection_ready()
     elif cmd[1] == "status":
-        lan.print_status()
+        eth.status()
     elif cmd[1] == "ping":
-        lan.ping()
+        eth.ping()
     elif cmd[1] == "loop":
-        set_loop_cb("lan", lan.loop, int(cmd[2]))
+        set_loop_cb("lan", eth.loop, int(cmd[2]))
 
 
 def parse_input(cmd):
