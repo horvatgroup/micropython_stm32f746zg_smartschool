@@ -53,9 +53,17 @@ class MQTTClient:
         self.lw_retain = retain
 
     def connect(self, clean_session=True):
+        if self.sock is not None:
+            self.disconnect()
+
         self.sock = socket.socket()
         addr = socket.getaddrinfo(self.server, self.port)[0][-1]
-        self.sock.connect(addr)
+        try:
+            self.sock.connect(addr)
+        except:
+            self.sock = None
+            raise
+
         if self.ssl:
             import ussl
             self.sock = ussl.wrap_socket(self.sock, **self.ssl_params)
@@ -100,8 +108,14 @@ class MQTTClient:
         return resp[2] & 1
 
     def disconnect(self):
-        self.sock.write(b"\xe0\0")
-        self.sock.close()
+        if self.sock is not None:
+            try:
+                self.sock.write(b"\xe0\0")
+                self.sock.close()
+            except:
+                raise
+            finally:
+                self.sock = None
 
     def ping(self):
         self.sock.write(b"\xc0\0")
@@ -174,7 +188,7 @@ class MQTTClient:
         if res == b"\xd0":  # PINGRESP
             sz = self.sock.read(1)[0]
             assert sz == 0
-            return None
+            return 0xd0
         op = res[0]
         if op & 0xf0 != 0x30:
             return op
@@ -195,6 +209,7 @@ class MQTTClient:
             self.sock.write(pkt)
         elif op & 6 == 4:
             assert 0
+        return 0
 
     # Checks whether a pending message from server is available.
     # If not, returns immediately with None. Otherwise, does
