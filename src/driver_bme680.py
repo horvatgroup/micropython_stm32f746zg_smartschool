@@ -255,4 +255,4 @@ class BME680_I2C(Adafruit_BME680):
             register += 1
 
     def read(self):
-        return {"temperature": self.temperature, "pressure": self.pressure, "humidity": self.humidity, "gas": self.gas, "altitude": self.altitude}
+        return {"TEMPERATURE": self.temperature, "PRESSURE": self.pressure, "HUMIDITY": self.humidity, "GAS": self.gas, "ALTITUDE": self.altitude}

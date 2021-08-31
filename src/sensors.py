@@ -5,6 +5,7 @@ import driver_bh1750fvi
 import driver_mhz19b
 
 sensors = []
+on_state_change_cb = None
 
 
 class Radar:
@@ -20,7 +21,7 @@ class Radar:
         if data != self.data:
             self.data = data
             if self.on_change:
-                self.on_change({"radar": data})
+                self.on_change({"RADAR": data})
 
     def loop(self):
         if common.millis_passed(self.timestamp) >= self.timeout:
@@ -36,17 +37,17 @@ class Environment:
         self.timeout = timeout
         self.on_change = on_change
         self.data = {}
-        self.data['temperature'] = 0.0
-        self.data['pressure'] = 0.0
-        self.data['gas'] = 0
-        self.data['altitude'] = 0.0
-        self.data['humidity'] = 0.0
+        self.data['TEMPERATURE'] = 0.0
+        self.data['PRESSURE'] = 0.0
+        self.data['GAS'] = 0
+        self.data['ALTITUDE'] = 0.0
+        self.data['HUMIDITY'] = 0.0
         self.diff = {}
-        self.diff['temperature'] = 1.0
-        self.diff['pressure'] = 0.1
-        self.diff['gas'] = 1
-        self.diff['altitude'] = 0.1
-        self.diff['humidity'] = 0.1
+        self.diff['TEMPERATURE'] = 1.0
+        self.diff['PRESSURE'] = 0.1
+        self.diff['GAS'] = 1
+        self.diff['ALTITUDE'] = 0.1
+        self.diff['HUMIDITY'] = 0.1
 
     def get_sensor(self):
         if self.sensor != None:
@@ -55,7 +56,8 @@ class Environment:
             try:
                 self.sensor = driver_bme680.BME680_I2C(self.i2c)
                 return self.sensor
-            except:
+            except Exception as e:
+                print("[SENSORS]: ERROR @ Environment get_sensor with %s" % (e))
                 self.sensor = None
                 return None
 
@@ -69,7 +71,8 @@ class Environment:
                         self.data[key] = data[key]
                         if self.on_change:
                             self.on_change({key: self.data[key]})
-            except:
+            except Exception as e:
+                print("[SENSORS]: ERROR @ Environment read with %s" % (e))
                 self.sensor = None
 
     def loop(self):
@@ -94,8 +97,9 @@ class Light:
             if diff != 0 and diff > self.diff:
                 self.data = data
                 if self.on_change:
-                    self.on_change({"light": self.data})
-        except:
+                    self.on_change({"LIGHT": self.data})
+        except Exception as e:
+            print("[SENSORS]: ERROR @ Light with %s" % (e))
             pass
 
     def loop(self):
@@ -121,7 +125,8 @@ class Co2:
             try:
                 self.sensor = driver_mhz19b.MHZ19BSensor(self.uart)
                 return self.sensor
-            except:
+            except Exception as e:
+                print("[SENSORS]: ERROR @ Co2 get_sensor with %s" % (e))
                 self.sensor = None
                 return None
 
@@ -134,8 +139,9 @@ class Co2:
                     if diff != 0 and diff > self.diff:
                         self.data = data
                         if self.on_change:
-                            self.on_change({"co2": self.data})
-            except:
+                            self.on_change({"CO2": self.data})
+            except Exception as e:
+                print("[SENSORS]: ERROR @ Co2 read with %s" % (e))
                 self.sensor = None
 
     def loop(self):
@@ -149,6 +155,10 @@ class Co2:
 
 def publish_results(sensor_board, data):
     print("[SENSORS]: %s -> %s" % (sensor_board, str(data)))
+    if on_state_change_cb != None:
+        for d in data:
+            topic = "%s_%s" % (sensor_board, d)
+            on_state_change_cb(topic, data[d])
 
 
 def init():
@@ -169,6 +179,12 @@ def init():
     sensors.append(Co2(s2_uart, on_change=lambda x: publish_results("S2", x)))
 
 
+def register_on_state_change_callback(cb):
+    global on_state_change_cb
+    print("[SENSORS]: register on state change cb")
+    on_state_change_cb = cb
+
+
 def loop():
     for sensor in sensors:
         sensor.loop()
@@ -179,20 +195,3 @@ def test():
     init()
     while True:
         loop()
-
-# S1: {'radar': 1}
-# S1: {'temperature': 26.88586}
-# S1: {'pressure': 996.904}
-# S1: {'gas': 101219}
-# S1: {'altitude': 136.9887}
-# S1: {'humidity': 30.71368}
-# S1: {'light': 50}
-
-# S2: {'radar': 1}
-# S2: {'temperature': 34.75129}
-# S2: {'pressure': 997.032}
-# S2: {'gas': 131553}
-# S2: {'altitude': 135.9106}
-# S2: {'humidity': 27.13816}
-# S2: {'light': 10}
-# S2: {'co2': 1478}

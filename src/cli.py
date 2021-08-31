@@ -109,7 +109,7 @@ def parse_lan(cmd):
     if cmd[1] == "init":
         eth.init()
     elif cmd[1] == "check":
-        eth.is_connection_ready()
+        eth.is_connection_alive()
     elif cmd[1] == "status":
         eth.status()
     elif cmd[1] == "ping":
