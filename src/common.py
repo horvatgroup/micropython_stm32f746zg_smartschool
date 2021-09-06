@@ -53,8 +53,8 @@ def create_input(pin, pullup=None):
 
 
 def create_interrupt(pin, cb=None):
-    interrupt_pin = create_input(pin.id)
-    interrupt_pin.irq(cb)
+    interrupt_pin = create_input(pin)
+    interrupt_pin.irq(trigger=Pin.IRQ_FALLING, handler=cb)
     return interrupt_pin
 
 
