@@ -2,12 +2,12 @@
 Testing MQTT on STM32f746ZG written in micropython. This is a part of a bigger project needed to automate schools electrical systems.
 
 ## Prerequests
-- `typer` install it using `pip install --user typer`
+- `typer` install it using `pip install --user typer rshell mpremote`
 - `stlink` install it using `sudo pacman -S stlink`
 
 ## Usage
 ### Flash micropython
-To use the board first you need to flash micropython and this can easily be done using `./make.py flash_micropython` command.
+To use the board first you need to flash micropython and this can easily be done using `./make.py flash-micropython` command.
 
 ### Flash
 `./make.py flash` will rsync `./src` directory to `/pyboard/flash/` directory
