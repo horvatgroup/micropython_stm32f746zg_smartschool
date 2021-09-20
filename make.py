@@ -79,12 +79,19 @@ def run_bash_cmd(cmd, echo=False, interaction={}, return_lines=True, return_code
         return lines
 
 
+def dismember(it, num=3):
+    it = iter(it)
+    while it.__length_hint__() > 0:
+        if (it.__length_hint__() >= num):
+            yield [next(it) for i in range(num)]
+        else:
+            yield [next(it) for i in range(it.__length_hint__())]
+
 def get_rshell_base_command():
     return "rshell -p %s --buffer-size %d" % (options["DEVICE_PATH"], options["BUFFER_SIZE"])
 
 
 def get_mpremote_base_command():
-    # return "mpremote connect %s" % (options["DEVICE_PATH"])
     return "mpremote"
 
 
@@ -113,16 +120,63 @@ def flash():
 
 
 @app.command()
-def flash_force():
-    files = glob.glob("./src/*.py")
-    cmd = "%s fs cp %s :" % (get_mpremote_base_command(), " ".join(files))
+def _cp(file):
+    cmd = "%s cp %s /pyboard/flash/" % (get_rshell_base_command(), file)
     lines = run_bash_cmd(cmd)
     for line in lines:
         if "timed out or error" in line:
             print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
+            return False
+    return True
+
+
+@app.command()
+def cp():
+    files = glob.glob("./src/*.py")
+    files.sort()
+    if len(files):
+        for e, f in enumerate(files):
+            print("[%d] %s" % (e, f.split("/")[2]))
+        index = int(input("Select index: "))
+        _cp(files[index])
+
+
+@app.command()
+def _rm(file):
+    cmd = "%s fs rm :%s" % (get_mpremote_base_command(), file)
+    lines = run_bash_cmd(cmd)
+    for line in lines:
+        if "Traceback" in line:
+            print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
+            return False
+    return True
+
 
 @app.command()
 def rm():
+    cmd = "%s fs ls" % (get_mpremote_base_command())
+    files = [line.strip().split(" ")[1] for line in run_bash_cmd(cmd)][1:]
+    files.sort()
+    if len(files):
+        for e, f in enumerate(files):
+            print("[%d] %s" % (e, f.split("/")[2]))
+        index = int(input("Select index: "))
+        _rm(files[index])
+
+
+@app.command()
+def cp_all():
+    files = glob.glob("./src/*.py")
+    for file in files:
+        if not _cp(file):
+            _rm(file)
+            input("restart board and and press Return")
+            if not _cp(file):
+                print("Can't copy aborting")
+
+
+@app.command()
+def rm_all():
     cmd = "%s fs ls" % (get_mpremote_base_command())
     files = [line.strip().split(" ")[1] for line in run_bash_cmd(cmd)][1:]
     for f in files:
@@ -133,20 +187,6 @@ def rm():
                 print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
                 return
 
-@app.command()
-def cp():
-    files = glob.glob("./src/*.py")
-    files.sort()
-    for e,f in enumerate(files):
-        print("[%d] %s" % (e, f.split("/")[2]))
-    index = int(input("Select index: "))
-    #cmd = "%s fs cp %s :" % (get_mpremote_base_command(), files[index])
-    cmd = "%s cp %s /pyboard/flash/" % (get_rshell_base_command(), files[index])
-    lines = run_bash_cmd(cmd)
-    for line in lines:
-        if "Traceback" in line:
-            print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
-            return
 
 @app.command()
 def flash_micropython():
@@ -163,7 +203,7 @@ def flash_micropython():
 
 
 @app.command()
-def erase():
+def erase_micropython():
     cmd = "st-flash erase"
     run_bash_cmd(cmd)
 
