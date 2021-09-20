@@ -4,6 +4,11 @@ import uselect
 import time
 
 # https://docs.openmv.io/library/network.LAN.html
+# https://github.com/EchoDel/hardware_projects/blob/main/micropython/micropython-async-master/v2/sock_nonblock.py
+# https://github.com/peterhinch/micropython-mqtt/blob/master/mqtt_as/mqtt_as.py
+# https://github.com/microhomie/microhomie/blob/master/lib/mqtt_as.py
+# https://github.com/micropython/micropython-lib/blob/master/micropython/umqtt.simple/umqtt/simple.py
+# https://github.com/fizista/micropython-umqtt.simple2/blob/master/src/umqtt/simple2.py
 
 mac = ""
 eth = None
