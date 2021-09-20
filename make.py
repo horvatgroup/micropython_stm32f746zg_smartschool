@@ -122,7 +122,7 @@ def flash_force():
             print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
 
 @app.command()
-def flash_rm():
+def rm():
     cmd = "%s fs ls" % (get_mpremote_base_command())
     files = [line.strip().split(" ")[1] for line in run_bash_cmd(cmd)][1:]
     for f in files:
@@ -132,6 +132,21 @@ def flash_rm():
             if "Traceback" in line:
                 print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
                 return
+
+@app.command()
+def cp():
+    files = glob.glob("./src/*.py")
+    files.sort()
+    for e,f in enumerate(files):
+        print("[%d] %s" % (e, f.split("/")[2]))
+    index = int(input("Select index: "))
+    #cmd = "%s fs cp %s :" % (get_mpremote_base_command(), files[index])
+    cmd = "%s cp %s /pyboard/flash/" % (get_rshell_base_command(), files[index])
+    lines = run_bash_cmd(cmd)
+    for line in lines:
+        if "Traceback" in line:
+            print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
+            return
 
 @app.command()
 def flash_micropython():
