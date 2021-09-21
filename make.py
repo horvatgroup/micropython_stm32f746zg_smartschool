@@ -112,7 +112,7 @@ def shell():
 
 
 @app.command()
-def flash():
+def sync():
     cmd = "%s rsync ./src /pyboard/flash/" % (get_rshell_base_command())
     lines = run_bash_cmd(cmd)
     for line in lines:
@@ -160,7 +160,7 @@ def rm():
     files.sort()
     if len(files):
         for e, f in enumerate(files):
-            print("[%d] %s" % (e, f.split("/")[2]))
+            print("[%d] %s" % (e, f))
         index = int(input("Select index: "))
         _rm(files[index])
 

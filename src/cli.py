@@ -9,6 +9,11 @@ spoll = None
 input_buffer = []
 loop_cbs = []
 
+# import uos
+# uos.statvfs('/flash')[1]*uos.statvfs('/flash')[2]
+# 80896 bytes
+# import micropython
+# micropython.mem_info()
 
 def init():
     print("[CLI]: init")
