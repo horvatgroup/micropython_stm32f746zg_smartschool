@@ -1,7 +1,7 @@
 from mqtt_as import MQTTClient
 import uasyncio as asyncio
 
-SERVER = '192.168.88.32'  # Change to suit e.g. 'iot.eclipse.org'
+SERVER = '192.168.88.42'  # Change to suit e.g. 'iot.eclipse.org'
 
 def callback(topic, msg, retained):
     print((topic, msg, retained))
@@ -19,12 +19,8 @@ async def main(client):
         await client.publish('result', '{}'.format(n), qos = 1)
         n += 1
 
-config['subs_cb'] = callback
-config['connect_coro'] = conn_han
-config['server'] = SERVER
-
 MQTTClient.DEBUG = True  # Optional: print diagnostic messages
-client = MQTTClient(config)
+client = MQTTClient(subs_cb=callback, connect_coro=conn_han, server=SERVER)
 try:
     asyncio.run(main(client))
 finally:
