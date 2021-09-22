@@ -12,8 +12,14 @@ loop_cbs = []
 # import uos
 # uos.statvfs('/flash')[1]*uos.statvfs('/flash')[2]
 # 80896 bytes
+# uos.statvfs('/flash')
+# (512, 512, 158, 148, 148, 0, 0, 0, 0, 255)
+
 # import micropython
 # micropython.mem_info()
+# stack: 484 out of 15360
+# GC: total: 165120, used: 2416, free: 162704
+#  No. of 1-blocks: 32, 2-blocks: 12, max blk sz: 40, max free sz: 10157
 
 def init():
     print("[CLI]: init")

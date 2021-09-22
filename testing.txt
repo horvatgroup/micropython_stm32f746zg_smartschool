@@ -1,0 +1,80 @@
+bez kabla samo lan.init()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "runner_as.py", line 30, in run
+  File "uasyncio/core.py", line 1, in run
+  File "uasyncio/core.py", line 1, in run_until_complete
+  File "uasyncio/core.py", line 1, in run_until_complete
+  File "runner_as.py", line 15, in main
+  File "mqtt_as.py", line 556, in connect
+  File "mqtt_as.py", line 207, in _connect
+OSError: [Errno 113] EHOSTUNREACH
+
+sa kablom nema promjene
+sa ipom
+
+>>> runner_as.run()
+Connecting to broker.
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "runner_as.py", line 30, in run
+  File "uasyncio/core.py", line 1, in run
+  File "uasyncio/core.py", line 1, in run_until_complete
+  File "uasyncio/core.py", line 1, in run_until_complete
+  File "runner_as.py", line 15, in main
+  File "mqtt_as.py", line 556, in connect
+  File "mqtt_as.py", line 249, in _connect
+  File "mqtt_as.py", line 154, in _as_read
+OSError: [Errno 104] ECONNRESET
+
+>>> runner_as.run()
+Connecting to broker.
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "runner_as.py", line 30, in run
+  File "uasyncio/core.py", line 1, in run
+  File "uasyncio/core.py", line 1, in run_until_complete
+  File "uasyncio/core.py", line 1, in run_until_complete
+  File "runner_as.py", line 15, in main
+  File "mqtt_as.py", line 556, in connect
+  File "mqtt_as.py", line 240, in _connect
+  File "mqtt_as.py", line 190, in _send_str
+  File "mqtt_as.py", line 178, in _as_write
+OSError: [Errno 104] ECONNRESET
+
+upaljen mosquitto
+>>> runner_as.run()
+Connecting to broker.
+Connected to broker.
+
+kad ugasim service
+Connecting to broker.
+Error in reconnect. [Errno 104] ECONNRESET
+al ne pukne
+
+kad upalim
+Connecting to broker.
+Connected to broker.
+Reconnect OK!
+
+kad odstekam mrezu nakon odprili 1m
+Connecting to broker.
+Error in reconnect. -1
+
+uvijek se oporavi
+
+odsteakl kabel na duze
+Connecting to broker.
+Error in reconnect. -1
+Connecting to broker.
+Error in reconnect. -1
+Connecting to broker.
+Error in reconnect. [Errno 103] ECONNABORTED
+Error in reconnect. [Errno 113] EHOSTUNREACH
+Error in reconnect. [Errno 113] EHOSTUNREACH
+Error in reconnect. [Errno 113] EHOSTUNREACH
+Error in reconnect. [Errno 113] EHOSTUNREACH
+
+oporavilo se
+
+

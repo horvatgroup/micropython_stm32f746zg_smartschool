@@ -28,8 +28,11 @@ Following [Micropython's README](https://github.com/micropython/micropython/tree
 - `git clone https://github.com/micropython/micropython.git`
 - `cd micropython`
 - `git checkout v1.17`
-- `cp ../micropython_stm32f746zg_smartschool/boards/NUCLEO_F746ZG/pins.csv ./ports/stm32/boards/NUCLEO_F746ZG/`
-- `cp ../micropython_stm32f746zg_smartschool/boards/NUCLEO_F746ZG/mpconfigboard.h ./ports/stm32/boards/NUCLEO_F746ZG/`
+- `cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/NUCLEO_F746ZG/pins.csv ./ports/stm32/boards/NUCLEO_F746ZG/`
+- `cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/NUCLEO_F746ZG/mpconfigboard.h ./ports/stm32/boards/NUCLEO_F746ZG/`
+- `cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/NUCLEO_F746ZG/mpconfigboard.mk ./ports/stm32/boards/NUCLEO_F746ZG/`
+- `cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/stm32f746.ld ./ports/stm32/boards/`
+- `cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/flashbdev.c ./ports/stm32/`
 - `make -C mpy-cross`
 - `cd ports/stm32/`
 - `make submodules`

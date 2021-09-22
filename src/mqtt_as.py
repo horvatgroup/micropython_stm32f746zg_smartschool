@@ -9,6 +9,7 @@
 import gc
 import usocket as socket
 import ustruct as struct
+import lan
 
 gc.collect()
 from ubinascii import hexlify
