@@ -25,21 +25,23 @@ When using shell with `./make.py shell` you can add files manually to `/pyboard/
 ## Building micropython manually
 Following [Micropython's README](https://github.com/micropython/micropython/tree/master/ports/stm32#readme) these are the steps:
 
-- `git clone https://github.com/micropython/micropython.git`
-- `cd micropython`
-- `git checkout v1.17`
-- `cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/NUCLEO_F746ZG/pins.csv ./ports/stm32/boards/NUCLEO_F746ZG/`
-- `cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/NUCLEO_F746ZG/mpconfigboard.h ./ports/stm32/boards/NUCLEO_F746ZG/`
-- `cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/NUCLEO_F746ZG/mpconfigboard.mk ./ports/stm32/boards/NUCLEO_F746ZG/`
-- `cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/stm32f746.ld ./ports/stm32/boards/`
-- `cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/flashbdev.c ./ports/stm32/`
-- `make -C mpy-cross`
-- `cd ports/stm32/`
-- `make submodules`
-- `make BOARD=NUCLEO_F746ZG`
-- `cd build-NUCLEO_F746ZG`
-- `objcopy -I ihex firmware.hex -O binary firmware.bin`
-- `cp firmware.* ../../../../micropython_stm32f746zg_smartschool/build-NUCLEO_F746ZG`
+```bash
+git clone https://github.com/micropython/micropython.git
+cd micropython
+git checkout v1.17
+cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/NUCLEO_F746ZG/pins.csv ./ports/stm32/boards/NUCLEO_F746ZG/
+cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/NUCLEO_F746ZG/mpconfigboard.h ./ports/stm32/boards/NUCLEO_F746ZG/
+cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/NUCLEO_F746ZG/mpconfigboard.mk ./ports/stm32/boards/NUCLEO_F746ZG/
+cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/stm32f746.ld ./ports/stm32/boards/
+cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/flashbdev.c ./ports/stm32/
+make -C mpy-cross
+cd ports/stm32/
+make submodules
+make BOARD=NUCLEO_F746ZG
+cd build-NUCLEO_F746ZG
+objcopy -I ihex firmware.hex -O binary firmware.bin
+cp firmware.* ../../../../micropython_stm32f746zg_smartschool/build-NUCLEO_F746ZG<
+```
 
 ## Testing
 ### MQTT using mosquitto
