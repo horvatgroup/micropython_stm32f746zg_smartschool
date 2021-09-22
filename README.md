@@ -40,7 +40,7 @@ make submodules
 make BOARD=NUCLEO_F746ZG
 cd build-NUCLEO_F746ZG
 objcopy -I ihex firmware.hex -O binary firmware.bin
-cp firmware.* ../../../../micropython_stm32f746zg_smartschool/build-NUCLEO_F746ZG
+cp firmware.* ../../../../micropython_stm32f746zg_smartschool/build-NUCLEO_F746ZG/
 ```
 
 ## Testing

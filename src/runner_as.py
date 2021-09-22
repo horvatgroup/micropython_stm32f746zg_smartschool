@@ -27,6 +27,7 @@ async def main(client):
 
 def init():
     global client
+    lan.init()
     MQTTClient.DEBUG = True  # Optional: print diagnostic messages
     client = MQTTClient(client_id=lan.mac, subs_cb=callback, connect_coro=conn_han, server=SERVER)
 

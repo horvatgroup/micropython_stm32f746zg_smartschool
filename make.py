@@ -117,7 +117,13 @@ def sync():
     lines = run_bash_cmd(cmd)
     for line in lines:
         if "timed out or error" in line:
-            print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
+            print("Error trying to fix the issue")
+            rm_empty()
+            cmd = "%s rsync ./src /pyboard/flash/" % (get_rshell_base_command())
+            lines = run_bash_cmd(cmd)
+            for line in lines:
+                if "timed out or error" in line:
+                    print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
 
 
 @app.command()
@@ -187,6 +193,20 @@ def rm_all():
             if "Traceback" in line:
                 print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
                 return
+
+
+@app.command()
+def rm_empty():
+    cmd = "%s fs ls" % (get_mpremote_base_command())
+    files = [(line.strip().split(" ")[1], line.strip().split(" ")[0]) for line in run_bash_cmd(cmd)][1:]
+    for f in files:
+        if f[1] == str(0):
+            cmd = "%s fs rm :%s" % (get_mpremote_base_command(), f)
+            lines = run_bash_cmd(cmd)
+            for line in lines:
+                if "Traceback" in line:
+                    print("%sERROR:%s while flashing" % (Base.WARNING, Base.END))
+                    return
 
 
 @app.callback()

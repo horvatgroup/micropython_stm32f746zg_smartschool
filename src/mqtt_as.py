@@ -23,7 +23,7 @@ gc.collect()
 from micropython import const
 
 gc.collect()
-#from sys import platform
+# from sys import platform
 platform = "linux"
 
 VERSION = (0, 6, 0)
