@@ -136,10 +136,6 @@ class MQTT_base:
         self._lw_qos = qos
         self._lw_retain = retain
 
-    def dprint(self, *args):
-        if self.DEBUG:
-            print(*args)
-
     def _timeout(self, t):
         return ticks_diff(ticks_ms(), t) > self._response_time
 
@@ -210,7 +206,7 @@ class MQTT_base:
             if e.args[0] not in BUSY_ERRORS:
                 raise
         await asyncio.sleep_ms(_DEFAULT_MS)
-        self.dprint('Connecting to broker.')
+        print('[MQTTAS]: Connecting to broker.')
         if self._ssl:
             import ussl
             self._sock = ussl.wrap_socket(self._sock, **self._ssl_params)
@@ -248,7 +244,7 @@ class MQTT_base:
         # Await CONNACK
         # read causes ECONNABORTED if broker is out; triggers a reconnect.
         resp = await self._as_read(4)
-        self.dprint('Connected to broker.')  # Got CONNACK
+        print('[MQTTAS]: Connected to broker.')  # Got CONNACK
         if resp[3] != 0 or resp[0] != 0x20 or resp[1] != 0x02:
             raise OSError(-1)  # Bad CONNACK e.g. authentication fail.
 
@@ -538,12 +534,12 @@ class MQTTClient(MQTT_base):
         if not s.isconnected():
             raise OSError
         # Ensure connection stays up for a few secs.
-        self.dprint('Checking WiFi integrity.')
+        print('[MQTTAS]: Checking WiFi integrity.')
         for _ in range(5):
             if not s.isconnected():
                 raise OSError  # in 1st 5 secs
             await asyncio.sleep(1)
-        self.dprint('Got reliable connection')
+        print('[MQTTAS]: Got reliable connection')
 
     async def connect(self):
         if not self._has_connected:
@@ -553,11 +549,16 @@ class MQTTClient(MQTT_base):
             self._addr = socket.getaddrinfo(self.server, self.port)[0][-1]
         self._in_connect = True  # Disable low level ._isconnected check
         clean = self._clean if self._has_connected else self._clean_init
-        try:
-            await self._connect(clean)
-        except Exception:
-            self.close()
-            raise
+        while True:
+            try:
+                print("[MQTTAS]: Trying to connect")
+                await self._connect(clean)
+                break
+            except Exception:
+                print("[MQTTAS]: Cant connect; retry")
+                await asyncio.sleep(1)
+                #self.close()
+                #raise
         self.rcv_pids.clear()
         # If we get here without error broker/LAN must be up.
         self._isconnected = True
@@ -594,7 +595,7 @@ class MQTTClient(MQTT_base):
         while self.isconnected():
             pings_due = ticks_diff(ticks_ms(), self.last_rx) // self._ping_interval
             if pings_due >= 4:
-                self.dprint('Reconnect: broker fail.')
+                print('[MQTTAS]: Reconnect: broker fail.')
                 break
             elif pings_due >= 1:
                 try:
@@ -613,7 +614,7 @@ class MQTTClient(MQTT_base):
             count %= 20
             if not count:
                 gc.collect()
-                print('RAM free {} alloc {}'.format(gc.mem_free(), gc.mem_alloc()))
+                print('[MQTTAS]: RAM free {} alloc {}'.format(gc.mem_free(), gc.mem_alloc()))
 
     def isconnected(self):
         if self._in_connect:  # Disable low-level check during .connect()
@@ -656,19 +657,19 @@ class MQTTClient(MQTT_base):
                 except OSError:
                     continue
                 if not self._has_connected:  # User has issued the terminal .disconnect()
-                    self.dprint('Disconnected, exiting _keep_connected')
+                    print('[MQTTAS]: Disconnected, exiting _keep_connected')
                     break
                 try:
                     await self.connect()
                     # Now has set ._isconnected and scheduled _connect_handler().
-                    self.dprint('Reconnect OK!')
+                    print('[MQTTAS]: Reconnect OK!')
                 except OSError as e:
-                    self.dprint('Error in reconnect.', e)
+                    print('[MQTTAS]: Error in reconnect.', e)
                     # Can get ECONNABORTED or -1. The latter signifies no or bad CONNACK received.
                     self.close()  # Disconnect and try again.
                     self._in_connect = False
                     self._isconnected = False
-        self.dprint('Disconnected, exited _keep_connected')
+        print('[MQTTAS]: Disconnected, exited _keep_connected')
 
     async def subscribe(self, topic, qos=0):
         qos_check(qos)

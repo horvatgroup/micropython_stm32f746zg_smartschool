@@ -148,7 +148,10 @@ def loop():
         for byte in bytes:
             cmd = handle_input(byte)
             if cmd:
-                parse_input(cmd)
+                try:
+                    parse_input(cmd)
+                except Exception as e:
+                    print("[CLI]: cmd probably incomplete with error %s" % (e))
             for loop_cb in loop_cbs:
                 loop_cb.loop()
 
