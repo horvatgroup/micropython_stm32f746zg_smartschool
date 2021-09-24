@@ -1,3 +1,4 @@
+import uasyncio as asyncio
 import sys
 import uselect
 import leds
@@ -8,6 +9,7 @@ import lan
 spoll = None
 input_buffer = []
 loop_cbs = []
+
 
 # import uos
 # uos.statvfs('/flash')[1]*uos.statvfs('/flash')[2]
@@ -156,8 +158,21 @@ def loop():
                 loop_cb.loop()
 
 
+async def loop_async():
+    print("[CLI]: loop_async")
+    while True:
+        loop()
+        await asyncio.sleep(0)
+
+
 def test():
     print("[CLI]: test")
     init()
     while True:
         loop()
+
+
+def test_async():
+    print("[CLI]: test_async")
+    init()
+    asyncio.run(test_async())

@@ -1,29 +1,10 @@
-#!/bin/bash
-
+import uasyncio as asyncio
+import time
 import common
 import common_pins
-import time
 
-
-class Led:
-    def __init__(self, id, name, active_high=False):
-        self.output = common.create_output(id)
-        self.active_high = active_high
-        self.set_state(0)
-        self.name = name
-
-    def set_state(self, state):
-        if self.active_high:
-            if state:
-                self.output.off()
-            else:
-                self.output.on()
-        else:
-            if state:
-                self.output.on()
-            else:
-                self.output.off()
-
+relays = []
+leds = []
 
 relay_pins = [
     common_pins.RELAY_8,
@@ -61,37 +42,35 @@ led_pins = [
     common_pins.B1_LED2_R
 ]
 
-relays = []
-leds = []
 
+class Led:
+    def __init__(self, id, name, active_high=False):
+        self.output = common.create_output(id)
+        self.active_high = active_high
+        self.set_state(0)
+        self.name = name
 
-def init_relays():
-    for pin in relay_pins:
-        relays.append(Led(pin.id, pin.name))
-
-
-def init_leds():
-    for pin in led_pins:
-        if "ONBOARD" in pin.name:
-            leds.append(Led(pin.id, pin.name))
+    def set_state(self, state):
+        if self.active_high:
+            if state:
+                self.output.off()
+            else:
+                self.output.on()
         else:
-            leds.append(Led(pin.id, pin.name, True))
+            if state:
+                self.output.on()
+            else:
+                self.output.off()
 
 
-def init():
-    print("[LEDS]: init")
-    init_relays()
-    init_leds()
-
-
-def loop():
-    pass
-
-
-def test():
-    print("[LEDS]: test")
-    init()
-    loop()
+def set_state_by_name(name, state):
+    print("[LEDS]: set_state_by_name(%s, %s)" % (name, state))
+    for relay in relays:
+        if relay.name == name:
+            relay.set_state(state)
+    for led in leds:
+        if led.name == name:
+            led.set_state(state)
 
 
 def test_relays():
@@ -118,11 +97,44 @@ def test_leds():
         time.sleep_ms(1000)
 
 
-def set_state_by_name(name, state):
-    print("[LEDS]: set_state_by_name(%s, %s)" % (name, state))
-    for relay in relays:
-        if relay.name == name:
-            relay.set_state(state)
-    for led in leds:
-        if led.name == name:
-            led.set_state(state)
+def init_relays():
+    for pin in relay_pins:
+        relays.append(Led(pin.id, pin.name))
+
+
+def init_leds():
+    for pin in led_pins:
+        if "ONBOARD" in pin.name:
+            leds.append(Led(pin.id, pin.name))
+        else:
+            leds.append(Led(pin.id, pin.name, active_high=True))
+
+
+def init():
+    print("[LEDS]: init")
+    init_relays()
+    init_leds()
+
+
+def loop():
+    pass
+
+
+async def loop_async():
+    print("[LEDS]: loop_async")
+    while True:
+        loop()
+        await asyncio.sleep(0)
+
+
+def test():
+    print("[LEDS]: test")
+    init()
+    while True:
+        loop()
+
+
+def test_async():
+    print("[LEDS]: test_async")
+    init()
+    asyncio.run(loop_async())

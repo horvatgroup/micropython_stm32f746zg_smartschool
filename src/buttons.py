@@ -1,7 +1,20 @@
+import uasyncio as asyncio
 import common
 import common_pins
 
 on_state_change_cb = None
+buttons = []
+
+button_pins = [common_pins.ONBOARD_BUTTON,
+               common_pins.B1_SW1,
+               common_pins.B1_SW2,
+               common_pins.B2_SW1,
+               common_pins.B2_SW2,
+               common_pins.B3_SW1,
+               common_pins.B3_SW2,
+               common_pins.B4_SW1,
+               common_pins.B4_SW2
+               ]
 
 
 class Button:
@@ -19,23 +32,9 @@ class Button:
                 on_state_change_cb(self.name, self.state)
 
 
-button_pins = [common_pins.ONBOARD_BUTTON,
-               common_pins.B1_SW1,
-               common_pins.B1_SW2,
-               common_pins.B2_SW1,
-               common_pins.B2_SW2,
-               common_pins.B3_SW1,
-               common_pins.B3_SW2,
-               common_pins.B4_SW1,
-               common_pins.B4_SW2
-               ]
-
-buttons = []
-
-
 def register_on_state_change_callback(cb):
-    global on_state_change_cb
     print("[BUTTONS]: register on state change cb")
+    global on_state_change_cb
     on_state_change_cb = cb
 
 
@@ -50,7 +49,21 @@ def loop():
         button.check()
 
 
+async def loop_async():
+    print("[BUTTONS]: loop_async")
+    while True:
+        loop()
+        await asyncio.sleep(0)
+
+
 def test():
+    print("[BUTTONS]: test")
     init()
     while True:
         loop()
+
+
+def test_async():
+    print("[BUTTONS]: test_async")
+    init()
+    asyncio.run(loop_async())

@@ -1,4 +1,4 @@
-# mqtt_as.py Asynchronous version of umqtt.robust
+# lib_mqtt_as.py Asynchronous version of umqtt.robust
 # (C) Copyright Peter Hinch 2017-2019.
 # (C) Copyright Kevin Köck 2018-2019.
 # Released under the MIT licence.

@@ -1,3 +1,4 @@
+import uasyncio as asyncio
 import common
 import driver_bme680
 import common_pins
@@ -48,6 +49,8 @@ class Environment:
         self.diff['GAS'] = 1
         self.diff['ALTITUDE'] = 0.1
         self.diff['HUMIDITY'] = 0.1
+        self.disable_error_print = False
+
 
     def get_sensor(self):
         if self.sensor != None:
@@ -57,7 +60,9 @@ class Environment:
                 self.sensor = driver_bme680.BME680_I2C(self.i2c)
                 return self.sensor
             except Exception as e:
-                print("[SENSORS]: ERROR @ Environment get_sensor with %s" % (e))
+                if not self.disable_error_print:
+                    print("[SENSORS]: ERROR @ Environment get_sensor with %s" % (e))
+                    self.disable_error_print = True
                 self.sensor = None
                 return None
 
@@ -65,6 +70,7 @@ class Environment:
         if self.get_sensor() != None:
             try:
                 data = self.get_sensor().read()
+                self.disable_error_print = False
                 for key in data:
                     diff = abs(data[key] - self.data[key])
                     if diff != 0 and diff > self.diff[key]:
@@ -89,18 +95,21 @@ class Light:
         self.on_change = on_change
         self.data = 0
         self.diff = 1
+        self.disable_error_print = False
 
     def read(self):
         try:
             data = driver_bh1750fvi.sample(self.i2c)
+            self.disable_error_print = False
             diff = abs(data - self.data)
             if diff != 0 and diff > self.diff:
                 self.data = data
                 if self.on_change:
                     self.on_change({"LIGHT": self.data})
         except Exception as e:
-            print("[SENSORS]: ERROR @ Light with %s" % (e))
-            pass
+            if not self.disable_error_print:
+                print("[SENSORS]: ERROR @ Light with %s" % (e))
+                self.disable_error_print = True
 
     def loop(self):
         if common.millis_passed(self.timestamp) >= self.timeout:
@@ -117,6 +126,7 @@ class Co2:
         self.on_change = on_change
         self.data = 0
         self.diff = 1
+        self.disable_error_print = False
 
     def get_sensor(self):
         if self.sensor != None:
@@ -134,6 +144,7 @@ class Co2:
         if self.get_sensor() != None:
             try:
                 data = self.get_sensor().measure()
+                self.disable_error_print = False
                 if data:
                     diff = abs(data - self.data)
                     if diff != 0 and diff > self.diff:
@@ -141,7 +152,9 @@ class Co2:
                         if self.on_change:
                             self.on_change({"CO2": self.data})
             except Exception as e:
-                print("[SENSORS]: ERROR @ Co2 read with %s" % (e))
+                if not self.disable_error_print:
+                    print("[SENSORS]: ERROR @ Co2 read with %s" % (e))
+                    self.disable_error_print = True
                 self.sensor = None
 
     def loop(self):
@@ -159,6 +172,12 @@ def publish_results(sensor_board, data):
         for d in data:
             topic = "%s_%s" % (sensor_board, d)
             on_state_change_cb(topic, data[d])
+
+
+def register_on_state_change_callback(cb):
+    global on_state_change_cb
+    print("[SENSORS]: register on state change cb")
+    on_state_change_cb = cb
 
 
 def init():
@@ -179,15 +198,16 @@ def init():
     sensors.append(Co2(s2_uart, on_change=lambda x: publish_results("S2", x)))
 
 
-def register_on_state_change_callback(cb):
-    global on_state_change_cb
-    print("[SENSORS]: register on state change cb")
-    on_state_change_cb = cb
-
-
 def loop():
     for sensor in sensors:
         sensor.loop()
+
+
+async def loop_async():
+    print("[SENSORS]: loop_async")
+    while True:
+        loop()
+        await asyncio.sleep(0)
 
 
 def test():
@@ -195,3 +215,9 @@ def test():
     init()
     while True:
         loop()
+
+
+def test_async():
+    print("[SENSORS]: test_async")
+    init()
+    asyncio.run(loop_async())
