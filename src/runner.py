@@ -5,6 +5,7 @@ import leds
 import sensors
 import mqtt
 import cli
+import sync_data
 
 async def process_time_measure():
     print("[RUNNER]: start process_time_measure")
@@ -27,6 +28,7 @@ def init():
     sensors.init()
     mqtt.init()
     cli.init()
+    sync_data.init()
 
 
 async def run():

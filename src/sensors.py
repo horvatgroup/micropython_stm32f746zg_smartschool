@@ -10,7 +10,7 @@ on_state_change_cb = None
 
 
 class Radar:
-    def __init__(self, pin, timeout=3000, on_change=None):
+    def __init__(self, pin, timeout=1000, on_change=None):
         self.input = common.create_input(pin)
         self.timestamp = 0
         self.timeout = timeout
@@ -31,7 +31,7 @@ class Radar:
 
 
 class Environment:
-    def __init__(self, i2c, timeout=3000, on_change=None):
+    def __init__(self, i2c, timeout=60000, on_change=None):
         self.i2c = i2c
         self.sensor = None
         self.timestamp = 0
@@ -87,7 +87,7 @@ class Environment:
 
 
 class Light:
-    def __init__(self, i2c, timeout=3000, on_change=None):
+    def __init__(self, i2c, timeout=60000, on_change=None):
         self.i2c = i2c
         self.timestamp = 0
         self.timeout = timeout
@@ -117,7 +117,7 @@ class Light:
 
 
 class Co2:
-    def __init__(self, uart, timeout=3000, on_change=None):
+    def __init__(self, uart, timeout=60000, on_change=None):
         self.uart = uart
         self.sensor = None
         self.timestamp = 0

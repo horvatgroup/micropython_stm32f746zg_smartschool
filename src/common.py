@@ -2,6 +2,7 @@ from machine import Pin, SoftI2C, UART
 from time import ticks_ms, sleep
 import uasyncio as asyncio
 
+
 def get_millis():
     return ticks_ms()
 
@@ -122,6 +123,7 @@ def test_button_board(pin_sw, pin_led_gb, pin_led_r):
             elif led_state == 3:
                 led_r.off()
                 led_gb.off()
+
 
 async def loop_async(name, action, timeout=3):
     print("[%s]: start loop_async" % (name))

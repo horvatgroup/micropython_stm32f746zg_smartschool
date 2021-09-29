@@ -5,62 +5,74 @@ import leds
 
 remote_path = {
     # inputs
-    "ONBOARD_BUTTON": "test/button1",
-    "B1_SW1": "room1/button1",
-    "B1_SW2": "room1/button2",
-    "B2_SW1": "room1/button3",
-    "B2_SW2": "room1/button4",
-    "B3_SW1": "room2/button1",
-    "B3_SW2": "room2/button2",
-    "B4_SW1": "room2/button3",
-    "B4_SW2": "room2/button4",
+    "ONBOARD_BUTTON": "out/test/button1",
+    "B1_SW1": "out/B4/SW1",
+    "B1_SW2": "out/B4/SW2",
+    "B2_SW1": "out/B3/SW1",
+    "B2_SW2": "out/B3/SW2",
+    "B3_SW1": "out/B2/SW1",
+    "B3_SW2": "out/B2/SW2",
+    "B4_SW1": "out/B1/SW1",
+    "B4_SW2": "out/B1/SW2",
     # sensors
-    "S1_RADAR": "room1/radar",
-    "S1_TEMPERATURE": "room1/temperature",
-    "S1_PRESSURE": "room1/pressure",
-    "S1_GAS": "room1/gas",
-    "S1_ALTITUDE": "room1/altitude",
-    "S1_HUMIDITY": "room1/humidity",
-    "S1_LIGHT": "room1/light",
-    "S2_RADAR": "room2/radar",
-    "S2_TEMPERATURE": "room2/temperature",
-    "S2_PRESSURE": "room2/pressure",
-    "S2_GAS": "room2/gas",
-    "S2_ALTITUDE": "room2/altitude",
-    "S2_HUMIDITY": "room2/humidity",
-    "S2_LIGHT": "room2/light",
+    "S1_RADAR": "out/S2/radar",
+    "S1_TEMPERATURE": "out/S2/temperature",
+    "S1_PRESSURE": "out/S2/pressure",
+    "S1_GAS": "out/S2/gas",
+    "S1_ALTITUDE": "out/S2/altitude",
+    "S1_HUMIDITY": "out/S2/humidity",
+    "S1_LIGHT": "out/S2/light",
+    "S2_RADAR": "out/S1/radar",
+    "S2_TEMPERATURE": "out/S1/temperature",
+    "S2_PRESSURE": "out/S1/pressure",
+    "S2_GAS": "out/S1/gas",
+    "S2_ALTITUDE": "out/S1/altitude",
+    "S2_HUMIDITY": "out/S1/humidity",
+    "S2_LIGHT": "out/S1/light",
     # outputs
-    "ONBOARD_LED1": "test/led1",
-    "ONBOARD_LED2": "test/led2",
-    "ONBOARD_LED3": "test/led3",
-    "RELAY_1": "room2/relay4",
-    "RELAY_2": "room2/relay3",
-    "RELAY_3": "room2/relay2",
-    "RELAY_4": "room2/relay1",
-    "RELAY_5": "room1/relay4",
-    "RELAY_6": "room1/relay3",
-    "RELAY_7": "room1/relay2",
-    "RELAY_8": "room1/relay1",
-    "RELAY_9": "room1/relay5",
-    "RELAY_10": "room1/relay6",
-    "RELAY_11": "room2/relay5",
-    "RELAY_12": "room2/relay6",
-    "B1_LED1_GB": "room1/button1_led1",
-    "B1_LED1_R": "room1/button1_led2",
-    "B1_LED2_GB": "room1/button2_led1",
-    "B1_LED2_R": "room1/button2_led2",
-    "B2_LED1_GB": "room1/button3_led1",
-    "B2_LED1_R": "room1/button3_led2",
-    "B2_LED2_GB": "room1/button4_led1",
-    "B2_LED2_R": "room1/button4_led2",
-    "B3_LED1_GB": "room2/button1_led1",
-    "B3_LED1_R": "room2/button1_led2",
-    "B3_LED2_GB": "room2/button2_led1",
-    "B3_LED2_R": "room2/button2_led2",
-    "B4_LED1_GB": "room2/button3_led1",
-    "B4_LED1_R": "room2/button3_led2",
-    "B4_LED2_GB": "room2/button4_led1",
-    "B4_LED2_R": "room2/button4_led2",
+    "ONBOARD_LED1": "in/test/led1",
+    "ONBOARD_LED2": "in/test/led2",
+    "ONBOARD_LED3": "in/test/led3",
+    "RELAY_1": "in/R/relay8",
+    "RELAY_2": "in/R/relay7",
+    "RELAY_3": "in/R/relay6",
+    "RELAY_4": "in/R/relay5",
+    "RELAY_5": "in/R/relay4",
+    "RELAY_6": "in/R/relay3",
+    "RELAY_7": "in/R/relay2",
+    "RELAY_8": "in/R/relay1",
+    "RELAY_9": "in/R/relay9",
+    "RELAY_10": "in/R/relay10",
+    "RELAY_11": "in/R/relay11",
+    "RELAY_12": "in/R/relay12",
+    "RELAY_1_OUT": "out/R/relay8",
+    "RELAY_2_OUT": "out/R/relay7",
+    "RELAY_3_OUT": "out/R/relay6",
+    "RELAY_4_OUT": "out/R/relay5",
+    "RELAY_5_OUT": "out/R/relay4",
+    "RELAY_6_OUT": "out/R/relay3",
+    "RELAY_7_OUT": "out/R/relay2",
+    "RELAY_8_OUT": "out/R/relay1",
+    "RELAY_9_OUT": "out/R/relay9",
+    "RELAY_10_OUT": "out/R/relay10",
+    "RELAY_11_OUT": "out/R/relay11",
+    "RELAY_12_OUT": "out/R/relay12",
+    "B1_LED1_GB": "in/B4/SW1/GB",
+    "B1_LED1_R": "in/B4/SW1/R",
+    "B1_LED2_GB": "in/B4/SW2/GB",
+    "B1_LED2_R": "in/B4/SW2/R",
+    "B2_LED1_GB": "in/B3/SW1/GB",
+    "B2_LED1_R": "in/B3/SW1/R",
+    "B2_LED2_GB": "in/B3/SW2/GB",
+    "B2_LED2_R": "in/B3/SW2/R",
+    "B3_LED1_GB": "in/B2/SW1/GB",
+    "B3_LED1_R": "in/B2/SW1/R",
+    "B3_LED2_GB": "in/B2/SW2/GB",
+    "B3_LED2_R": "in/B2/SW2/R",
+    "B4_LED1_GB": "in/B1/SW1/GB",
+    "B4_LED1_R": "in/B1/SW1/R",
+    "B4_LED2_GB": "in/B1/SW2/GB",
+    "B4_LED2_R": "in/B1/SW2/R",
 }
 
 
@@ -72,15 +84,19 @@ def on_button_state_change_callback(name, state):
     elif (name == "B1_SW2" and state == 1):
         leds.set_state_by_name("RELAY_2", 0)
 
+
 def on_sensor_state_change_callback(name, state):
     topic = remote_path[name]
     mqtt.send_message(topic, str(state))
 
 
 def on_mqtt_message_received_callback(topic, msg):
-    name = get_key(topic)
-    state = int(msg)
-    leds.set_state_by_name(name, state)
+    try:
+        name = get_key(topic)
+        state = int(msg)
+        leds.set_state_by_name(name, state)
+    except Exception as e:
+        print("[SYNC_DATA]: message not implemented with %s" % (e))
 
 
 def get_key(val):
@@ -103,6 +119,6 @@ def test():
     mqtt.init()
     init()
     while True:
-        buttons.loop()
-        sensors.loop()
-        mqtt.loop()
+        buttons.action()
+        sensors.action()
+        mqtt.action()

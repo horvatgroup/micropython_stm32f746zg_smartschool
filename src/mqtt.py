@@ -28,21 +28,25 @@ def send_message(topic, msg):
     outgoing_messages[topic] = msg
 
 
-def handle_incoming_messages():
+async def handle_incoming_messages():
     for topic in incoming_messages.keys():
         msg = incoming_messages[topic]
         print("[MQTT]: received [%s] -> [%s]" % (topic, msg))
         if on_message_received_cb != None:
             on_message_received_cb(topic, msg)
         del incoming_messages[topic]
+        await asyncio.sleep(0)
 
 
 async def handle_outgoing_messages():
     for topic in outgoing_messages.keys():
         msg = outgoing_messages[topic]
-        await client.publish("%s/%s" % (PUBLISH_PREFIX, topic), msg, qos=1)
+        topic_out = "%s/%s" % (PUBLISH_PREFIX, topic)
+        await client.publish(topic_out, msg, qos=1)
+        print(topic_out)
         print("[MQTT]: sent [%s] -> [%s]" % (topic, msg))
         del outgoing_messages[topic]
+        await asyncio.sleep(0)
 
 
 def register_on_message_received_callback(cb):
@@ -75,7 +79,7 @@ def init():
     global SUBSCRIBE, PUBLISH_PREFIX
     lan.init()
     SUBSCRIBE = "%s/in/#" % (lan.mac)
-    PUBLISH_PREFIX = "%s/out" % (lan.mac)
+    PUBLISH_PREFIX = "%s" % (lan.mac)
     MQTTClient.DEBUG = True
     global client
     ip = read_ip_from_flash()
@@ -97,7 +101,7 @@ async def loop_async():
 
     print("[MQTT]: handle MQTT")
     while True:
-        handle_incoming_messages()
+        await handle_incoming_messages()
         await handle_outgoing_messages()
         await asyncio.sleep(0)
 
