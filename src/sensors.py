@@ -51,7 +51,6 @@ class Environment:
         self.diff['HUMIDITY'] = 0.1
         self.disable_error_print = False
 
-
     def get_sensor(self):
         if self.sensor != None:
             return self.sensor
@@ -197,35 +196,22 @@ def init():
     sensors.append(Light(s2_i2c, on_change=lambda x: publish_results("S2", x)))
     sensors.append(Co2(s2_uart, on_change=lambda x: publish_results("S2", x)))
 
-    loop()
+    action()
 
-def loop():
+
+def action():
     for sensor in sensors:
         sensor.loop()
-
-
-async def loop_async():
-    print("[SENSORS]: start loop_async")
-    bigest = 0
-    while True:
-        timestamp = common.get_millis()
-        loop()
-        timeout = common.millis_passed(timestamp)
-        if timeout >= 11:
-            if timeout > bigest:
-                bigest = timeout
-            print("[SENSORS]: timeout warning %d ms with bigest %d" % (timeout, bigest))
-        await asyncio.sleep(0)
 
 
 def test():
     print("[SENSORS]: test")
     init()
     while True:
-        loop()
+        action()
 
 
 def test_async():
     print("[SENSORS]: test_async")
     init()
-    asyncio.run(loop_async())
+    asyncio.run(common.loop_async("SENSORS", action))

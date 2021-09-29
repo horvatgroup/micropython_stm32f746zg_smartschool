@@ -1,6 +1,6 @@
 from machine import Pin, SoftI2C, UART
 from time import ticks_ms, sleep
-
+import uasyncio as asyncio
 
 def get_millis():
     return ticks_ms()
@@ -122,3 +122,16 @@ def test_button_board(pin_sw, pin_led_gb, pin_led_r):
             elif led_state == 3:
                 led_r.off()
                 led_gb.off()
+
+async def loop_async(name, action, timeout=3):
+    print("[%s]: start loop_async" % (name))
+    bigest = 0
+    while True:
+        timestamp = get_millis()
+        action()
+        timepassed = millis_passed(timestamp)
+        if timepassed >= timeout:
+            if timepassed > bigest:
+                bigest = timepassed
+            print("[%s]: timeout warning %d ms with bigest %d" % (name, timepassed, bigest))
+        await asyncio.sleep(0)

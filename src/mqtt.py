@@ -17,7 +17,8 @@ async def conn_han(client):
 
 
 def on_mqtt_message_received(topic, msg, retained):
-    print(topic, msg, retained)
+    topic = topic.decode()
+    msg = msg.decode()
     if lan.mac in topic:
         topic = "/".join(topic.split("/")[1:])
     incoming_messages[topic] = msg

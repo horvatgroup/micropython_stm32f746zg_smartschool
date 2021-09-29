@@ -25,13 +25,6 @@ loop_cbs = []
 # GC: total: 165120, used: 2416, free: 162704
 #  No. of 1-blocks: 32, 2-blocks: 12, max blk sz: 40, max free sz: 10157
 
-def init():
-    print("[CLI]: init")
-    global spoll
-    spoll = uselect.poll()
-    spoll.register(sys.stdin, uselect.POLLIN)
-    loop()
-
 def read_from_usb():
     return (sys.stdin.read(1) if spoll.poll(0) else None)
 
@@ -160,7 +153,15 @@ def parse_input(cmd):
         print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
 
 
-def loop():
+def init():
+    print("[CLI]: init")
+    global spoll
+    spoll = uselect.poll()
+    spoll.register(sys.stdin, uselect.POLLIN)
+    action()
+
+
+def action():
     bytes = read_from_usb()
     if bytes:
         for byte in bytes:
@@ -174,28 +175,14 @@ def loop():
                 loop_cb.loop()
 
 
-async def loop_async():
-    print("[CLI]: start loop_async")
-    bigest = 0
-    while True:
-        timestamp = common.get_millis()
-        loop()
-        timeout = common.millis_passed(timestamp)
-        if timeout >= 3:
-            if timeout > bigest:
-                bigest = timeout
-            print("[CLI]: timeout warning %d ms with bigest %d" % (timeout, bigest))
-        await asyncio.sleep(0)
-
-
 def test():
     print("[CLI]: test")
     init()
     while True:
-        loop()
+        action()
 
 
 def test_async():
     print("[CLI]: test_async")
     init()
-    asyncio.run(test_async())
+    asyncio.run(common.loop_async("CLI", action))

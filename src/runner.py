@@ -6,7 +6,6 @@ import sensors
 import mqtt
 import cli
 
-
 async def process_time_measure():
     print("[RUNNER]: start process_time_measure")
     timestamp = common.get_millis()
@@ -30,20 +29,21 @@ def init():
     cli.init()
 
 
-async def loop():
+async def run():
     print("[RUNNER]: start loop")
-    while True:
-        await asyncio.sleep(10)
+    tasks = []
 
+    tasks.append(asyncio.create_task(common.loop_async("BUTTONS", buttons.action)))
+    tasks.append(asyncio.create_task(common.loop_async("LEDS", leds.action)))
+    tasks.append(asyncio.create_task(common.loop_async("SENSORS", sensors.action, timeout=11)))
+    tasks.append(asyncio.create_task(mqtt.loop_async()))
+    tasks.append(asyncio.create_task(common.loop_async("CLI", cli.action)))
+    tasks.append(asyncio.create_task(process_time_measure()))
+    for task in tasks:
+        await task
+        print("[RUNNER]: Error: loop task finished!")
 
-def run():
+def start():
     print("[RUNNER]: run")
     init()
-    global client
-    asyncio.create_task(buttons.loop_async())
-    asyncio.create_task(leds.loop_async())
-    asyncio.create_task(sensors.loop_async())
-    asyncio.create_task(mqtt.loop_async())
-    asyncio.create_task(cli.loop_async())
-    asyncio.create_task(process_time_measure())
-    asyncio.run(loop())
+    asyncio.run(run())
