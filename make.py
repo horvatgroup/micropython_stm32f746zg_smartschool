@@ -201,7 +201,7 @@ def rm_empty():
     files = [(line.strip().split(" ")[1], line.strip().split(" ")[0]) for line in run_bash_cmd(cmd)][1:]
     for f in files:
         if f[1] == str(0):
-            cmd = "%s fs rm :%s" % (get_mpremote_base_command(), f)
+            cmd = "%s fs rm :%s" % (get_mpremote_base_command(), f[0])
             lines = run_bash_cmd(cmd)
             for line in lines:
                 if "Traceback" in line:

@@ -42,6 +42,7 @@ def init():
     print("[BUTTONS]: init")
     for pin in button_pins:
         buttons.append(Button(pin))
+    loop()
 
 
 def loop():
@@ -50,9 +51,16 @@ def loop():
 
 
 async def loop_async():
-    print("[BUTTONS]: loop_async")
+    print("[BUTTONS]: start loop_async")
+    bigest = 0
     while True:
+        timestamp = common.get_millis()
         loop()
+        timeout = common.millis_passed(timestamp)
+        if timeout >= 3:
+            if timeout > bigest:
+                bigest = timeout
+            print("[BUTTONS]: timeout warning %d ms with bigest %d" % (timeout, bigest))
         await asyncio.sleep(0)
 
 

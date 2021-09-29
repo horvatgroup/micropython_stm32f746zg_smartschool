@@ -4,7 +4,9 @@ import uselect
 import leds
 import buttons
 import sensors
+import mqtt
 import lan
+import common
 
 spoll = None
 input_buffer = []
@@ -28,7 +30,7 @@ def init():
     global spoll
     spoll = uselect.poll()
     spoll.register(sys.stdin, uselect.POLLIN)
-
+    loop()
 
 def read_from_usb():
     return (sys.stdin.read(1) if spoll.poll(0) else None)
@@ -120,15 +122,27 @@ def parse_sensors(cmd):
 
 def parse_lan(cmd):
     if cmd[1] == "init":
-        eth.init()
+        lan.init()
     elif cmd[1] == "check":
-        eth.is_connection_alive()
-    elif cmd[1] == "status":
-        eth.status()
-    elif cmd[1] == "ping":
-        eth.ping()
-    elif cmd[1] == "loop":
-        set_loop_cb("lan", eth.loop, int(cmd[2]))
+        lan.check_link()
+    elif cmd[1] == "mac":
+        lan.print_mac()
+    else:
+        print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
+
+
+def parse_mqtt(cmd):
+    if cmd[1] == "ip":
+        if cmd[2] == "set":
+            mqtt.write_ip_to_flash(cmd[3])
+        elif cmd[2] == "get":
+            ip_flash = mqtt.read_ip_from_flash()
+            print("flash ip", ip_flash)
+            print("current ip", mqtt.client.server)
+        else:
+            print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
+    else:
+        print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
 
 
 def parse_input(cmd):
@@ -140,6 +154,8 @@ def parse_input(cmd):
         parse_sensors(cmd)
     elif cmd[0] == "lan":
         parse_lan(cmd)
+    elif cmd[0] == "mqtt":
+        parse_mqtt(cmd)
     else:
         print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
 
@@ -159,9 +175,16 @@ def loop():
 
 
 async def loop_async():
-    print("[CLI]: loop_async")
+    print("[CLI]: start loop_async")
+    bigest = 0
     while True:
+        timestamp = common.get_millis()
         loop()
+        timeout = common.millis_passed(timestamp)
+        if timeout >= 3:
+            if timeout > bigest:
+                bigest = timeout
+            print("[CLI]: timeout warning %d ms with bigest %d" % (timeout, bigest))
         await asyncio.sleep(0)
 
 

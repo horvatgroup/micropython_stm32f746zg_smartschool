@@ -114,6 +114,7 @@ def init():
     print("[LEDS]: init")
     init_relays()
     init_leds()
+    loop()
 
 
 def loop():
@@ -121,9 +122,16 @@ def loop():
 
 
 async def loop_async():
-    print("[LEDS]: loop_async")
+    print("[LEDS]: start loop_async")
+    bigest = 0
     while True:
+        timestamp = common.get_millis()
         loop()
+        timeout = common.millis_passed(timestamp)
+        if timeout >= 3:
+            if timeout > bigest:
+                bigest = timeout
+            print("[LEDS]: timeout warning %d ms with bigest %d" % (timeout, bigest))
         await asyncio.sleep(0)
 
 

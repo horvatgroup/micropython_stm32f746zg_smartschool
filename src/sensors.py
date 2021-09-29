@@ -197,6 +197,7 @@ def init():
     sensors.append(Light(s2_i2c, on_change=lambda x: publish_results("S2", x)))
     sensors.append(Co2(s2_uart, on_change=lambda x: publish_results("S2", x)))
 
+    loop()
 
 def loop():
     for sensor in sensors:
@@ -204,9 +205,16 @@ def loop():
 
 
 async def loop_async():
-    print("[SENSORS]: loop_async")
+    print("[SENSORS]: start loop_async")
+    bigest = 0
     while True:
+        timestamp = common.get_millis()
         loop()
+        timeout = common.millis_passed(timestamp)
+        if timeout >= 11:
+            if timeout > bigest:
+                bigest = timeout
+            print("[SENSORS]: timeout warning %d ms with bigest %d" % (timeout, bigest))
         await asyncio.sleep(0)
 
 

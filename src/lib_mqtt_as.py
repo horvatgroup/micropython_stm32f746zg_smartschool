@@ -25,6 +25,8 @@ from micropython import const
 gc.collect()
 # from sys import platform
 platform = "linux"
+gc_mem_free = None
+gc_mem_alloc = None
 
 VERSION = (0, 6, 0)
 
@@ -607,6 +609,7 @@ class MQTTClient(MQTT_base):
 
     # DEBUG: show RAM messages.
     async def _memory(self):
+        global gc_mem_free, gc_mem_alloc
         count = 0
         while self.isconnected():  # Ensure just one instance.
             await asyncio.sleep(1)  # Quick response to outage.
@@ -614,7 +617,10 @@ class MQTTClient(MQTT_base):
             count %= 20
             if not count:
                 gc.collect()
-                print('[MQTTAS]: RAM free {} alloc {}'.format(gc.mem_free(), gc.mem_alloc()))
+                if gc_mem_free != gc.mem_free() or gc_mem_alloc != gc.mem_alloc():
+                    gc_mem_free = gc.mem_free()
+                    gc_mem_alloc = gc.mem_alloc()
+                    print('[MQTTAS]: RAM free {} alloc {}'.format(gc_mem_free, gc_mem_alloc))
 
     def isconnected(self):
         if self._in_connect:  # Disable low-level check during .connect()

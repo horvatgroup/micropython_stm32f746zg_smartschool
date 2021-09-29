@@ -2,7 +2,8 @@ import uasyncio as asyncio
 import lan
 from lib_mqtt_as import MQTTClient
 
-SERVER = '192.168.88.42'
+DEFAULT_SERVER = '192.168.88.42'
+MQTT_IP_FILENAME = "mqtt_ip.txt"
 SUBSCRIBE = None
 PUBLISH_PREFIX = None
 client = None
@@ -16,6 +17,7 @@ async def conn_han(client):
 
 
 def on_mqtt_message_received(topic, msg, retained):
+    print(topic, msg, retained)
     if lan.mac in topic:
         topic = "/".join(topic.split("/")[1:])
     incoming_messages[topic] = msg
@@ -48,6 +50,25 @@ def register_on_message_received_callback(cb):
     on_message_received_cb = cb
 
 
+def write_ip_to_flash(ip):
+    print("[MQTT]: ip write to file %s" % (ip))
+    f = open(MQTT_IP_FILENAME, 'w')
+    f.write(ip)
+    f.close()
+
+
+def read_ip_from_flash():
+    try:
+        f = open(MQTT_IP_FILENAME)
+        ip = f.read()
+        f.close()
+        print("[MQTT]: ip read from file %s" % (ip))
+        return ip
+    except:
+        print("[MQTT]: no ip found using default %s" % (DEFAULT_SERVER))
+        return None
+
+
 def init():
     print("[MQTT]: init")
     global SUBSCRIBE, PUBLISH_PREFIX
@@ -56,11 +77,14 @@ def init():
     PUBLISH_PREFIX = "%s/out" % (lan.mac)
     MQTTClient.DEBUG = True
     global client
-    client = MQTTClient(client_id=lan.mac, subs_cb=on_mqtt_message_received, connect_coro=conn_han, server=SERVER)
+    ip = read_ip_from_flash()
+    if not ip:
+        ip = DEFAULT_SERVER
+    client = MQTTClient(client_id=lan.mac, subs_cb=on_mqtt_message_received, connect_coro=conn_han, server=ip)
 
 
 async def loop_async():
-    print("[MQTT]: loop_async")
+    print("[MQTT]: start loop_async")
     print("[MQTT]: connect to LAN")
     while True:
         if lan.check_link() == True:
@@ -77,7 +101,7 @@ async def loop_async():
         await asyncio.sleep(0)
 
 
-def test():
+def test_async():
+    print("[MQTT]: test_async")
     init()
-    while True:
-        loop()
+    asyncio.run(loop_async())
