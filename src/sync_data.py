@@ -22,6 +22,7 @@ remote_path = {
     "S1_ALTITUDE": "out/S2/altitude",
     "S1_HUMIDITY": "out/S2/humidity",
     "S1_LIGHT": "out/S2/light",
+    "S1_CO2": "out/S1/co2",
     "S2_RADAR": "out/S1/radar",
     "S2_TEMPERATURE": "out/S1/temperature",
     "S2_PRESSURE": "out/S1/pressure",
@@ -29,6 +30,7 @@ remote_path = {
     "S2_ALTITUDE": "out/S1/altitude",
     "S2_HUMIDITY": "out/S1/humidity",
     "S2_LIGHT": "out/S1/light",
+    "S2_CO2": "out/S2/co2",
     # outputs
     "ONBOARD_LED1": "in/test/led1",
     "ONBOARD_LED2": "in/test/led2",
@@ -45,18 +47,6 @@ remote_path = {
     "RELAY_10": "in/R/relay10",
     "RELAY_11": "in/R/relay11",
     "RELAY_12": "in/R/relay12",
-    "RELAY_1_OUT": "out/R/relay8",
-    "RELAY_2_OUT": "out/R/relay7",
-    "RELAY_3_OUT": "out/R/relay6",
-    "RELAY_4_OUT": "out/R/relay5",
-    "RELAY_5_OUT": "out/R/relay4",
-    "RELAY_6_OUT": "out/R/relay3",
-    "RELAY_7_OUT": "out/R/relay2",
-    "RELAY_8_OUT": "out/R/relay1",
-    "RELAY_9_OUT": "out/R/relay9",
-    "RELAY_10_OUT": "out/R/relay10",
-    "RELAY_11_OUT": "out/R/relay11",
-    "RELAY_12_OUT": "out/R/relay12",
     "B1_LED1_GB": "in/B4/SW1/GB",
     "B1_LED1_R": "in/B4/SW1/R",
     "B1_LED2_GB": "in/B4/SW2/GB",
@@ -73,6 +63,18 @@ remote_path = {
     "B4_LED1_R": "in/B1/SW1/R",
     "B4_LED2_GB": "in/B1/SW2/GB",
     "B4_LED2_R": "in/B1/SW2/R",
+    "RELAY_1_OUT": "out/R/relay8",
+    "RELAY_2_OUT": "out/R/relay7",
+    "RELAY_3_OUT": "out/R/relay6",
+    "RELAY_4_OUT": "out/R/relay5",
+    "RELAY_5_OUT": "out/R/relay4",
+    "RELAY_6_OUT": "out/R/relay3",
+    "RELAY_7_OUT": "out/R/relay2",
+    "RELAY_8_OUT": "out/R/relay1",
+    "RELAY_9_OUT": "out/R/relay9",
+    "RELAY_10_OUT": "out/R/relay10",
+    "RELAY_11_OUT": "out/R/relay11",
+    "RELAY_12_OUT": "out/R/relay12",
 }
 
 
@@ -110,15 +112,3 @@ def init():
     buttons.register_on_state_change_callback(on_button_state_change_callback)
     sensors.register_on_state_change_callback(on_sensor_state_change_callback)
     mqtt.register_on_message_received_callback(on_mqtt_message_received_callback)
-
-
-def test():
-    buttons.init()
-    sensors.init()
-    leds.init()
-    mqtt.init()
-    init()
-    while True:
-        buttons.action()
-        sensors.action()
-        mqtt.action()
