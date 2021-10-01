@@ -81,11 +81,14 @@ remote_path = {
 def on_button_state_change_callback(name, state):
     topic = remote_path[name]
     mqtt.send_message(topic, str(state))
-    if (name == "B1_SW1" and state == 1):
+    if (name == "B4_SW1" and state == 1):
+        leds.set_state_by_name("B4_LED1_R", 0)
+        leds.set_state_by_name("B4_LED1_GB", 1)
         leds.set_state_by_name("RELAY_1", 1)
-    elif (name == "B1_SW2" and state == 1):
-        leds.set_state_by_name("RELAY_2", 0)
-
+    elif (name == "B4_SW2" and state == 1):
+        leds.set_state_by_name("B4_LED1_R", 1)
+        leds.set_state_by_name("B4_LED1_GB", 0)
+        leds.set_state_by_name("RELAY_1", 0)
 
 def on_sensor_state_change_callback(name, state):
     topic = remote_path[name]
@@ -112,3 +115,5 @@ def init():
     buttons.register_on_state_change_callback(on_button_state_change_callback)
     sensors.register_on_state_change_callback(on_sensor_state_change_callback)
     mqtt.register_on_message_received_callback(on_mqtt_message_received_callback)
+    leds.set_state_by_name("B4_LED1_R", 1)
+    leds.set_state_by_name("B4_LED1_GB", 0)
