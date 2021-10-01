@@ -114,7 +114,6 @@ def init():
     print("[LEDS]: init")
     init_relays()
     init_leds()
-    action()
 
 
 def action():

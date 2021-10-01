@@ -5,16 +5,19 @@ import common_pins
 import driver_bh1750fvi
 import driver_mhz19b
 
-sensors = []
+environment_sensors = []
+realtime_sensors = []
 on_state_change_cb = None
 
 
 class Radar:
-    def __init__(self, pin, timeout=1000, on_change=None):
+    def __init__(self, pin, timeout=3, on_change=None, name="RADAR", sensor_board=""):
         self.input = common.create_input(pin)
-        self.timestamp = 0
         self.timeout = timeout
+        self.biggest = 0
         self.on_change = on_change
+        self.name = name
+        self.sensor_board = sensor_board
         self.data = 2  # data is binary
 
     def read(self):
@@ -22,21 +25,27 @@ class Radar:
         if data != self.data:
             self.data = data
             if self.on_change:
-                self.on_change({"RADAR": data})
+                self.on_change(self.get_name(), data)
 
     def loop(self):
-        if common.millis_passed(self.timestamp) >= self.timeout:
-            self.timestamp = common.get_millis()
-            self.read()
+        self.read()
+
+    def get_name(self):
+        if self.sensor_board:
+            return "%s_%s" % (self.sensor_board, self.name)
+        else:
+            return self.name
 
 
 class Environment:
-    def __init__(self, i2c, timeout=60000, on_change=None):
+    def __init__(self, i2c, timeout=3, on_change=None, name="ENV", sensor_board=""):
         self.i2c = i2c
         self.sensor = None
-        self.timestamp = 0
         self.timeout = timeout
+        self.biggest = 0
         self.on_change = on_change
+        self.name = name
+        self.sensor_board = sensor_board
         self.data = {}
         self.data['TEMPERATURE'] = 0.0
         self.data['PRESSURE'] = 0.0
@@ -60,7 +69,7 @@ class Environment:
                 return self.sensor
             except Exception as e:
                 if not self.disable_error_print:
-                    print("[SENSORS]: ERROR @ Environment get_sensor with %s" % (e))
+                    print("[SENSORS]: ERROR @ %s get_sensor with %s" % (self.get_name(), e))
                     self.disable_error_print = True
                 self.sensor = None
                 return None
@@ -75,23 +84,29 @@ class Environment:
                     if diff != 0 and diff > self.diff[key]:
                         self.data[key] = data[key]
                         if self.on_change:
-                            self.on_change({key: self.data[key]})
+                            self.on_change("%s_%s" % (self.get_name(), key), self.data[key])
             except Exception as e:
-                print("[SENSORS]: ERROR @ Environment read with %s" % (e))
+                print("[SENSORS]: ERROR @ %s read with %s" % (self.get_name(), e))
                 self.sensor = None
 
     def loop(self):
-        if common.millis_passed(self.timestamp) >= self.timeout:
-            self.timestamp = common.get_millis()
-            self.read()
+        self.read()
+
+    def get_name(self):
+        if self.sensor_board:
+            return "%s_%s" % (self.sensor_board, self.name)
+        else:
+            return self.name
 
 
 class Light:
-    def __init__(self, i2c, timeout=60000, on_change=None):
+    def __init__(self, i2c, timeout=3, on_change=None, name="LIGHT", sensor_board=""):
         self.i2c = i2c
-        self.timestamp = 0
         self.timeout = timeout
+        self.biggest = 0
         self.on_change = on_change
+        self.name = name
+        self.sensor_board = sensor_board
         self.data = 0
         self.diff = 1
         self.disable_error_print = False
@@ -104,25 +119,31 @@ class Light:
             if diff != 0 and diff > self.diff:
                 self.data = data
                 if self.on_change:
-                    self.on_change({"LIGHT": self.data})
+                    self.on_change(self.get_name(), self.data)
         except Exception as e:
             if not self.disable_error_print:
-                print("[SENSORS]: ERROR @ Light with %s" % (e))
+                print("[SENSORS]: ERROR @ %s with %s" % (self.get_name(), e))
                 self.disable_error_print = True
 
     def loop(self):
-        if common.millis_passed(self.timestamp) >= self.timeout:
-            self.timestamp = common.get_millis()
-            self.read()
+        self.read()
+
+    def get_name(self):
+        if self.sensor_board:
+            return "%s_%s" % (self.sensor_board, self.name)
+        else:
+            return self.name
 
 
 class Co2:
-    def __init__(self, uart, timeout=60000, on_change=None):
+    def __init__(self, uart, timeout=3, on_change=None, name="CO2", sensor_board=""):
         self.uart = uart
         self.sensor = None
-        self.timestamp = 0
         self.timeout = timeout
+        self.biggest = 0
         self.on_change = on_change
+        self.name = name
+        self.sensor_board = sensor_board
         self.data = 0
         self.diff = 1
         self.disable_error_print = False
@@ -135,7 +156,7 @@ class Co2:
                 self.sensor = driver_mhz19b.MHZ19BSensor(self.uart)
                 return self.sensor
             except Exception as e:
-                print("[SENSORS]: ERROR @ Co2 get_sensor with %s" % (e))
+                print("[SENSORS]: ERROR @ %s get_sensor with %s" % (self.get_name(), e))
                 self.sensor = None
                 return None
 
@@ -149,28 +170,30 @@ class Co2:
                     if diff != 0 and diff > self.diff:
                         self.data = data
                         if self.on_change:
-                            self.on_change({"CO2": self.data})
+                            self.on_change(self.get_name(), self.data)
             except Exception as e:
                 if not self.disable_error_print:
-                    print("[SENSORS]: ERROR @ Co2 read with %s" % (e))
+                    print("[SENSORS]: ERROR @ %s read with %s" % (self.get_name(), e))
                     self.disable_error_print = True
                 self.sensor = None
 
     def loop(self):
-        if common.millis_passed(self.timestamp) >= self.timeout:
-            self.timestamp = common.get_millis()
-            self.read()
+        self.read()
 
     def is_available(self):
         return True
 
+    def get_name(self):
+        if self.sensor_board:
+            return "%s_%s" % (self.sensor_board, self.name)
+        else:
+            return self.name
 
-def publish_results(sensor_board, data):
-    print("[SENSORS]: %s -> %s" % (sensor_board, str(data)))
+
+def publish_results(name, data):
+    print("[SENSORS]: %s -> %s" % (name, str(data)))
     if on_state_change_cb != None:
-        for d in data:
-            topic = "%s_%s" % (sensor_board, d)
-            on_state_change_cb(topic, data[d])
+        on_state_change_cb(name, data)
 
 
 def register_on_state_change_callback(cb):
@@ -181,37 +204,63 @@ def register_on_state_change_callback(cb):
 
 def init():
     print("[SENSORS]: init")
-    global sensors
+    global environment_sensors, realtime_sensors
     s1_i2c = common.create_i2c(common_pins.S1_SCL_BUF_I2C_1.id, common_pins.S1_SDA_BUF_I2C_1.id)
     s1_uart = common.create_uart(common_pins.S1_UART5.id)
-    sensors.append(Radar(common_pins.S1_RADAR_SIG.id, on_change=lambda x: publish_results("S1", x)))
-    sensors.append(Environment(s1_i2c, on_change=lambda x: publish_results("S1", x)))
-    sensors.append(Light(s1_i2c, on_change=lambda x: publish_results("S1", x)))
-    sensors.append(Co2(s1_uart, on_change=lambda x: publish_results("S1", x)))
+    realtime_sensors.append(Radar(common_pins.S1_RADAR_SIG.id, on_change=lambda x, y: publish_results(x, y), sensor_board="S1"))
+    environment_sensors.append(Environment(s1_i2c, on_change=lambda x, y: publish_results(x, y), sensor_board="S1"))
+    environment_sensors.append(Light(s1_i2c, on_change=lambda x, y: publish_results(x, y), sensor_board="S1"))
+    environment_sensors.append(Co2(s1_uart, on_change=lambda x, y: publish_results(x, y), sensor_board="S1"))
 
     s2_i2c = common.create_i2c(common_pins.S2_SCL_BUF_I2C_2.id, common_pins.S2_SDA_BUF_I2C_2.id)
     s2_uart = common.create_uart(common_pins.S2_UART2.id)
-    sensors.append(Radar(common_pins.S2_RADAR_SIG.id, on_change=lambda x: publish_results("S2", x)))
-    sensors.append(Environment(s2_i2c, on_change=lambda x: publish_results("S2", x)))
-    sensors.append(Light(s2_i2c, on_change=lambda x: publish_results("S2", x)))
-    sensors.append(Co2(s2_uart, on_change=lambda x: publish_results("S2", x)))
-
-    action()
+    realtime_sensors.append(Radar(common_pins.S2_RADAR_SIG.id, on_change=lambda x, y: publish_results(x, y), sensor_board="S2"))
+    environment_sensors.append(Environment(s2_i2c, on_change=lambda x, y: publish_results(x, y), sensor_board="S2"))
+    environment_sensors.append(Light(s2_i2c, on_change=lambda x, y: publish_results(x, y), sensor_board="S2"))
+    environment_sensors.append(Co2(s2_uart, on_change=lambda x, y: publish_results(x, y), sensor_board="S2"))
 
 
-def action():
-    for sensor in sensors:
-        sensor.loop()
-
-
-def test():
-    print("[SENSORS]: test")
-    init()
+async def environment_sensors_action():
+    print("[SENSORS]: environment_sensors_action")
     while True:
-        action()
+        for sensor in environment_sensors:
+            timestamp = common.get_millis()
+            sensor.loop()
+            timepassed = common.millis_passed(timestamp)
+            if timepassed >= sensor.timeout:
+                if timepassed > sensor.biggest:
+                    sensor.biggest = timepassed
+                print("[%s]: timeout warning %d ms with biggest %d" % (sensor.get_name(), timepassed, sensor.biggest))
+            await asyncio.sleep(0)
+        await asyncio.sleep(60)
 
 
-def test_async():
-    print("[SENSORS]: test_async")
+async def realtime_sensors_action():
+    print("[SENSORS]: realtime_sensors_action")
+    while True:
+        for sensor in realtime_sensors:
+            timestamp = common.get_millis()
+            sensor.loop()
+            timepassed = common.millis_passed(timestamp)
+            if timepassed >= sensor.timeout:
+                if timepassed > sensor.biggest:
+                    sensor.biggest = timepassed
+                print("[%s]: timeout warning %d ms with biggest %d" % (sensor.get_name(), timepassed, sensor.biggest))
+            await asyncio.sleep(0)
+        await asyncio.sleep(1)
+
+
+async def test_add_tasks():
+    print("[SENSORS]: test_add_tasks")
+    tasks = []
+    tasks.append(asyncio.create_task(realtime_sensors_action()))
+    tasks.append(asyncio.create_task(environment_sensors_action()))
+    for task in tasks:
+        await task
+        print("[RUNNER]: Error: loop task finished!")
+
+
+def test_start():
+    print("[RUNNER]: test_start")
     init()
-    asyncio.run(common.loop_async("SENSORS", action))
+    asyncio.run(test_add_tasks())

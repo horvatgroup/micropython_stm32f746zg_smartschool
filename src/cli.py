@@ -106,9 +106,9 @@ def parse_buttons(cmd):
 
 def parse_sensors(cmd):
     if cmd[1] == "init":
-        sensors.init()
+        environment_sensors.init()
     elif cmd[1] == "loop":
-        set_loop_cb("sensors", sensors.loop, int(cmd[2]))
+        set_loop_cb("sensors", environment_sensors.loop, int(cmd[2]))
     else:
         print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
 
@@ -158,7 +158,6 @@ def init():
     global spoll
     spoll = uselect.poll()
     spoll.register(sys.stdin, uselect.POLLIN)
-    action()
 
 
 def action():
