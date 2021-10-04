@@ -35,6 +35,7 @@ def init():
 async def add_tasks():
     print("[RUNNER]: add_tasks")
     tasks = []
+    tasks.append(asyncio.create_task(sync_data.loop_async()))
     tasks.append(asyncio.create_task(common.loop_async("BUTTONS", buttons.action)))
     tasks.append(asyncio.create_task(common.loop_async("LEDS", leds.action)))
     tasks.append(asyncio.create_task(sensors.realtime_sensors_action()))

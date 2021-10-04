@@ -1,119 +1,218 @@
+import uasyncio as asyncio
 import buttons
 import mqtt
 import sensors
 import leds
 
-remote_path = {
+
+class Device:
+    def __init__(self, hw, in_path=None, out_path=None):
+        self.hw = hw
+        self.in_path = in_path
+        self.out_path = out_path
+        self.out_local_state = None
+        self.out_remote_state = None
+        self.in_local_state = None
+        self.in_remote_state = None
+
+
+devices = (
     # inputs
-    "ONBOARD_BUTTON": "out/test/button1",
-    "B1_SW1": "out/B4/SW1",
-    "B1_SW2": "out/B4/SW2",
-    "B2_SW1": "out/B3/SW1",
-    "B2_SW2": "out/B3/SW2",
-    "B3_SW1": "out/B2/SW1",
-    "B3_SW2": "out/B2/SW2",
-    "B4_SW1": "out/B1/SW1",
-    "B4_SW2": "out/B1/SW2",
+    Device("ONBOARD_BUTTON", out_path="out/test/button1"),
+    Device("B1_SW1", out_path="out/B4/SW1"),
+    Device("B1_SW2", out_path="out/B4/SW2"),
+    Device("B2_SW1", out_path="out/B3/SW1"),
+    Device("B2_SW2", out_path="out/B3/SW2"),
+    Device("B3_SW1", out_path="out/B2/SW1"),
+    Device("B3_SW2", out_path="out/B2/SW2"),
+    Device("B4_SW1", out_path="out/B1/SW1"),
+    Device("B4_SW2", out_path="out/B1/SW2"),
     # sensors
-    "S1_RADAR": "out/S2/radar",
-    "S1_TEMPERATURE": "out/S2/temperature",
-    "S1_PRESSURE": "out/S2/pressure",
-    "S1_GAS": "out/S2/gas",
-    "S1_ALTITUDE": "out/S2/altitude",
-    "S1_HUMIDITY": "out/S2/humidity",
-    "S1_LIGHT": "out/S2/light",
-    "S1_CO2": "out/S1/co2",
-    "S2_RADAR": "out/S1/radar",
-    "S2_TEMPERATURE": "out/S1/temperature",
-    "S2_PRESSURE": "out/S1/pressure",
-    "S2_GAS": "out/S1/gas",
-    "S2_ALTITUDE": "out/S1/altitude",
-    "S2_HUMIDITY": "out/S1/humidity",
-    "S2_LIGHT": "out/S1/light",
-    "S2_CO2": "out/S2/co2",
+    Device("S1_RADAR", out_path="out/S2/radar"),
+    Device("S1_TEMPERATURE", out_path="out/S2/temperature"),
+    Device("S1_PRESSURE", out_path="out/S2/pressure"),
+    Device("S1_GAS", out_path="out/S2/gas"),
+    Device("S1_ALTITUDE", out_path="out/S2/altitude"),
+    Device("S1_HUMIDITY", out_path="out/S2/humidity"),
+    Device("S1_LIGHT", out_path="out/S2/light"),
+    Device("S1_CO2", out_path="out/S1/co2"),
+    Device("S2_RADAR", out_path="out/S1/radar"),
+    Device("S2_TEMPERATURE", out_path="out/S1/temperature"),
+    Device("S2_PRESSURE", out_path="out/S1/pressure"),
+    Device("S2_GAS", out_path="out/S1/gas"),
+    Device("S2_ALTITUDE", out_path="out/S1/altitude"),
+    Device("S2_HUMIDITY", out_path="out/S1/humidity"),
+    Device("S2_LIGHT", out_path="out/S1/light"),
+    Device("S2_CO2", out_path="out/S2/co2"),
     # outputs
-    "ONBOARD_LED1": "in/test/led1",
-    "ONBOARD_LED2": "in/test/led2",
-    "ONBOARD_LED3": "in/test/led3",
-    "RELAY_1": "in/R/relay8",
-    "RELAY_2": "in/R/relay7",
-    "RELAY_3": "in/R/relay6",
-    "RELAY_4": "in/R/relay5",
-    "RELAY_5": "in/R/relay4",
-    "RELAY_6": "in/R/relay3",
-    "RELAY_7": "in/R/relay2",
-    "RELAY_8": "in/R/relay1",
-    "RELAY_9": "in/R/relay9",
-    "RELAY_10": "in/R/relay10",
-    "RELAY_11": "in/R/relay11",
-    "RELAY_12": "in/R/relay12",
-    "B1_LED1_GB": "in/B4/SW1/GB",
-    "B1_LED1_R": "in/B4/SW1/R",
-    "B1_LED2_GB": "in/B4/SW2/GB",
-    "B1_LED2_R": "in/B4/SW2/R",
-    "B2_LED1_GB": "in/B3/SW1/GB",
-    "B2_LED1_R": "in/B3/SW1/R",
-    "B2_LED2_GB": "in/B3/SW2/GB",
-    "B2_LED2_R": "in/B3/SW2/R",
-    "B3_LED1_GB": "in/B2/SW1/GB",
-    "B3_LED1_R": "in/B2/SW1/R",
-    "B3_LED2_GB": "in/B2/SW2/GB",
-    "B3_LED2_R": "in/B2/SW2/R",
-    "B4_LED1_GB": "in/B1/SW1/GB",
-    "B4_LED1_R": "in/B1/SW1/R",
-    "B4_LED2_GB": "in/B1/SW2/GB",
-    "B4_LED2_R": "in/B1/SW2/R",
-    "RELAY_1_OUT": "out/R/relay8",
-    "RELAY_2_OUT": "out/R/relay7",
-    "RELAY_3_OUT": "out/R/relay6",
-    "RELAY_4_OUT": "out/R/relay5",
-    "RELAY_5_OUT": "out/R/relay4",
-    "RELAY_6_OUT": "out/R/relay3",
-    "RELAY_7_OUT": "out/R/relay2",
-    "RELAY_8_OUT": "out/R/relay1",
-    "RELAY_9_OUT": "out/R/relay9",
-    "RELAY_10_OUT": "out/R/relay10",
-    "RELAY_11_OUT": "out/R/relay11",
-    "RELAY_12_OUT": "out/R/relay12",
-}
+    Device("ONBOARD_LED1", in_path="in/test/led1", out_path="out/test/led1"),
+    Device("ONBOARD_LED2", in_path="in/test/led2", out_path="out/test/led2"),
+    Device("ONBOARD_LED3", in_path="in/test/led3", out_path="out/test/led3"),
+    Device("RELAY_1", in_path="in/R/relay8", out_path="out/R/relay8"),
+    Device("RELAY_2", in_path="in/R/relay7", out_path="out/R/relay7"),
+    Device("RELAY_3", in_path="in/R/relay6", out_path="out/R/relay6"),
+    Device("RELAY_4", in_path="in/R/relay5", out_path="out/R/relay5"),
+    Device("RELAY_5", in_path="in/R/relay4", out_path="out/R/relay4"),
+    Device("RELAY_6", in_path="in/R/relay3", out_path="out/R/relay3"),
+    Device("RELAY_7", in_path="in/R/relay2", out_path="out/R/relay2"),
+    Device("RELAY_8", in_path="in/R/relay1", out_path="out/R/relay1"),
+    Device("RELAY_9", in_path="in/R/relay9", out_path="out/R/relay9"),
+    Device("RELAY_10", in_path="in/R/relay10", out_path="out/R/relay10"),
+    Device("RELAY_11", in_path="in/R/relay11", out_path="out/R/relay11"),
+    Device("RELAY_12", in_path="in/R/relay12", out_path="out/R/relay12"),
+    Device("B1_LED1_GB", in_path="in/B4/SW1/GB", out_path="out/B4/SW1/GB"),
+    Device("B1_LED1_R", in_path="in/B4/SW1/R", out_path="out/B4/SW1/R"),
+    Device("B1_LED2_GB", in_path="in/B4/SW2/GB", out_path="out/B4/SW2/GB"),
+    Device("B1_LED2_R", in_path="in/B4/SW2/R", out_path="out/B4/SW2/R"),
+    Device("B2_LED1_GB", in_path="in/B3/SW1/GB", out_path="out/B3/SW1/GB"),
+    Device("B2_LED1_R", in_path="in/B3/SW1/R", out_path="out/B3/SW1/R"),
+    Device("B2_LED2_GB", in_path="in/B3/SW2/GB", out_path="out/B3/SW2/GB"),
+    Device("B2_LED2_R", in_path="in/B3/SW2/R", out_path="out/B3/SW2/R"),
+    Device("B3_LED1_GB", in_path="in/B2/SW1/GB", out_path="out/B2/SW1/GB"),
+    Device("B3_LED1_R", in_path="in/B2/SW1/R", out_path="out/B2/SW1/R"),
+    Device("B3_LED2_GB", in_path="in/B2/SW2/GB", out_path="out/B2/SW2/GB"),
+    Device("B3_LED2_R", in_path="in/B2/SW2/R", out_path="out/B2/SW2/R"),
+    Device("B4_LED1_GB", in_path="in/B1/SW1/GB", out_path="out/B1/SW1/GB"),
+    Device("B4_LED1_R", in_path="in/B1/SW1/R", out_path="out/B1/SW1/R"),
+    Device("B4_LED2_GB", in_path="in/B1/SW2/GB", out_path="out/B1/SW2/GB"),
+    Device("B4_LED2_R", in_path="in/B1/SW2/R", out_path="out/B1/SW2/R"),
+)
 
 
-def on_button_state_change_callback(name, state):
-    topic = remote_path[name]
-    mqtt.send_message(topic, str(state))
-    #if (name == "B4_SW1" and state == 1):
-    #    leds.set_state_by_name("B4_LED1_R", 0)
-    #    leds.set_state_by_name("B4_LED1_GB", 1)
-    #    leds.set_state_by_name("RELAY_1", 1)
-    #elif (name == "B4_SW2" and state == 1):
-    #    leds.set_state_by_name("B4_LED1_R", 1)
-    #    leds.set_state_by_name("B4_LED1_GB", 0)
-    #    leds.set_state_by_name("RELAY_1", 0)
-
-def on_sensor_state_change_callback(name, state):
-    topic = remote_path[name]
-    mqtt.send_message(topic, str(state))
+def activity_light_logic(hw, state):
+    led = get_device_from_hw(hw)
+    optimised_led_change(led, state)
 
 
-def on_mqtt_message_received_callback(topic, msg):
+def toggle_light_logic(light, first_time=False):
+    device = get_device_from_hw(light)
+    if first_time:
+        fliped_state = 0
+    else:
+        fliped_state = not device.in_local_state
+    optimised_led_change(device, fliped_state)
+
+
+def check_button_logic(hw, state):
+    device = get_device_from_hw(hw)
+    if device.hw == "B4_SW1":
+        activity_light_logic("B4_LED1_R", state)
+        if not state:
+            toggle_light_logic("RELAY_8", not device.out_local_state)
+            flip_light_logic("RELAY_8")
+    elif device.hw == "B4_SW2":
+        activity_light_logic("B4_LED2_R", state)
+        if not state:
+            toggle_light_logic("ONBOARD_LED2", not device.out_local_state)
+            flip_light_logic("ONBOARD_LED2")
+
+
+def flip_light_logic(hw):
+    if hw == "RELAY_8":
+        linked_light = get_device_from_hw("RELAY_8")
+        switch_light = get_device_from_hw("B4_LED1_GB")
+        optimised_led_change(switch_light, not linked_light.in_local_state)
+
+    elif hw == "ONBOARD_LED2":
+        linked_light = get_device_from_hw("ONBOARD_LED2")
+        switch_light = get_device_from_hw("B4_LED2_GB")
+        optimised_led_change(switch_light, not linked_light.in_local_state)
+
+
+def optimised_led_change(device, state):
+    device.in_remote_state = state
+    device.in_local_state = state
+    device.out_local_state = device.in_local_state
+    leds.set_state_by_name(device.hw, state)
+
+
+def on_button_state_change_callback(hw, state):
+    device = get_device_from_hw(hw)
+    check_button_logic(hw, state)
+    if device:
+        device.out_local_state = state
+
+
+def on_sensor_state_change_callback(hw, state):
+    device = get_device_from_hw(hw)
+    if device:
+        device.out_local_state = state
+
+
+def on_mqtt_message_received_callback(path, state):
+    device = get_device_from_path(path)
     try:
-        name = get_key(topic)
-        state = int(msg)
-        leds.set_state_by_name(name, state)
+        device.in_remote_state = int(state)
     except Exception as e:
-        print("[SYNC_DATA]: message not implemented with %s" % (e))
+        print("[SYNC]: ERROR probably not implemented with %s" % (e))
 
 
-def get_key(val):
-    for key, value in remote_path.items():
-        if val == value:
-            return key
+def get_device_from_hw(hw):
+    for device in devices:
+        if device.hw == hw:
+            return device
     return None
 
 
+def get_device_from_path(path):
+    for device in devices:
+        if device.in_path == path or device.out_path == path:
+            return device
+    return None
+
+
+def set_boot_led():
+    leds.set_state_by_name("ONBOARD_LED1", 1)
+
+
+mqtt_led_state = None
+
+
+def set_mqtt_led(state):
+    global mqtt_led_state
+    if mqtt_led_state != state:
+        mqtt_led_state = state
+        if state:
+            leds.set_state_by_name("ONBOARD_LED3", 1)
+        else:
+            leds.set_state_by_name("ONBOARD_LED3", 0)
+
+
+def info_leds_logic():
+    set_mqtt_led(mqtt.is_connected())
+
+
+def buttons_lights_logic():
+    pass
+
+
 def init():
+    print("[SYNC]: init")
     buttons.register_on_state_change_callback(on_button_state_change_callback)
     sensors.register_on_state_change_callback(on_sensor_state_change_callback)
     mqtt.register_on_message_received_callback(on_mqtt_message_received_callback)
-    #leds.set_state_by_name("B4_LED1_R", 1)
-    #leds.set_state_by_name("B4_LED1_GB", 0)
+
+
+async def loop_async():
+    print("[SYNC]: loop async")
+    set_boot_led()
+    while True:
+        info_leds_logic()
+        await asyncio.sleep(0)
+        buttons_lights_logic()
+        await asyncio.sleep(0)
+        if mqtt.is_connected():
+            for device in devices:
+                if device.out_path:
+                    if device.out_local_state != device.out_remote_state and device.out_local_state != None:
+                        device.out_remote_state = device.out_local_state
+                        await mqtt.send_message(device.out_path, str(device.out_remote_state))
+                await asyncio.sleep(0)
+                if device.in_path:
+                    if device.in_remote_state != device.in_local_state and device.in_remote_state != None:
+                        device.in_local_state = device.in_remote_state
+                        leds.set_state_by_name(device.hw, device.in_remote_state)
+                        if device.out_path:
+                            device.out_local_state = device.in_local_state
+                        flip_light_logic(device.hw)
+                await asyncio.sleep(0)

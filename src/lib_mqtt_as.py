@@ -559,8 +559,8 @@ class MQTTClient(MQTT_base):
             except Exception:
                 print("[MQTTAS]: Cant connect; retry")
                 await asyncio.sleep(1)
-                #self.close()
-                #raise
+                # self.close()
+                # raise
         self.rcv_pids.clear()
         # If we get here without error broker/LAN must be up.
         self._isconnected = True
@@ -705,3 +705,6 @@ class MQTTClient(MQTT_base):
             except OSError:
                 pass
             self._reconnect()  # Broker or WiFi fail.
+
+    def is_connected(self):
+        return self._isconnected

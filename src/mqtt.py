@@ -7,8 +7,6 @@ MQTT_IP_FILENAME = "mqtt_ip.txt"
 SUBSCRIBE = None
 PUBLISH_PREFIX = None
 client = None
-outgoing_messages = {}
-incoming_messages = {}
 on_message_received_cb = None
 
 
@@ -21,32 +19,15 @@ def on_mqtt_message_received(topic, msg, retained):
     msg = msg.decode()
     if lan.mac in topic:
         topic = "/".join(topic.split("/")[1:])
-    incoming_messages[topic] = msg
+    print("[MQTT]: received [%s] -> [%s]" % (topic, msg))
+    if on_message_received_cb != None:
+        on_message_received_cb(topic, msg)
 
 
-def send_message(topic, msg):
-    outgoing_messages[topic] = msg
-
-
-async def handle_incoming_messages():
-    for topic in incoming_messages.keys():
-        msg = incoming_messages[topic]
-        print("[MQTT]: received [%s] -> [%s]" % (topic, msg))
-        if on_message_received_cb != None:
-            on_message_received_cb(topic, msg)
-        del incoming_messages[topic]
-        await asyncio.sleep(0)
-
-
-async def handle_outgoing_messages():
-    for topic in outgoing_messages.keys():
-        msg = outgoing_messages[topic]
-        topic_out = "%s/%s" % (PUBLISH_PREFIX, topic)
-        await client.publish(topic_out, msg, qos=1)
-        print(topic_out)
-        print("[MQTT]: sent [%s] -> [%s]" % (topic, msg))
-        del outgoing_messages[topic]
-        await asyncio.sleep(0)
+async def send_message(topic, msg):
+    topic_out = "%s/%s" % (PUBLISH_PREFIX, topic)
+    print("[MQTT]: sent [%s] -> [%s]" % (topic, msg))
+    await client.publish(topic_out, msg, qos=1)
 
 
 def register_on_message_received_callback(cb):
@@ -74,6 +55,10 @@ def read_ip_from_flash():
         return None
 
 
+def is_connected():
+    return client.is_connected()
+
+
 def init():
     print("[MQTT]: init")
     global SUBSCRIBE, PUBLISH_PREFIX
@@ -99,11 +84,8 @@ async def loop_async():
     print("[MQTT]: connect to MQTT")
     await client.connect()
 
-    print("[MQTT]: handle MQTT")
     while True:
-        await handle_incoming_messages()
-        await handle_outgoing_messages()
-        await asyncio.sleep(0)
+        await asyncio.sleep(10)
 
 
 def test_async():

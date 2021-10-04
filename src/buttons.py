@@ -42,7 +42,6 @@ def init():
     print("[BUTTONS]: init")
     for pin in button_pins:
         buttons.append(Button(pin))
-    action()
 
 
 def action():
