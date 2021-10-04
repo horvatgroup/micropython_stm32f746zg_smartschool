@@ -10,10 +10,9 @@ class Device:
         self.hw = hw
         self.in_path = in_path
         self.out_path = out_path
-        self.out_local_state = None
         self.out_remote_state = None
-        self.in_local_state = None
         self.in_remote_state = None
+        self.state = None
 
 
 devices = (
@@ -80,63 +79,78 @@ devices = (
 
 
 def activity_light_logic(hw, state):
+    #print("activity_light_logic", hw, state)
     led = get_device_from_hw(hw)
     optimised_led_change(led, state)
 
 
-def toggle_light_logic(light, first_time=False):
-    device = get_device_from_hw(light)
+def toggle_light_logic(hw, first_time=False):
+    #print("toggle_light_logic", hw, first_time)
+    device = get_device_from_hw(hw)
     if first_time:
         fliped_state = 0
     else:
-        fliped_state = not device.in_local_state
+        fliped_state = not device.state
     optimised_led_change(device, fliped_state)
 
 
-def check_button_logic(hw, state):
+def check_button_logic(hw, state, first_time=False):
+    #print("check_button_logic", hw, state, first_time)
     device = get_device_from_hw(hw)
     if device.hw == "B4_SW1":
         activity_light_logic("B4_LED1_R", state)
         if not state:
-            toggle_light_logic("RELAY_8", not device.out_local_state)
-            flip_light_logic("RELAY_8")
+            toggle_light_logic("RELAY_8", first_time)
+        flip_light_logic("RELAY_8", "B4_LED1_R")
     elif device.hw == "B4_SW2":
         activity_light_logic("B4_LED2_R", state)
         if not state:
-            toggle_light_logic("ONBOARD_LED2", not device.out_local_state)
-            flip_light_logic("ONBOARD_LED2")
+            toggle_light_logic("ONBOARD_LED2", first_time)
+        flip_light_logic("ONBOARD_LED2", "B4_LED2_R")
 
 
-def flip_light_logic(hw):
+def flip_light_logic(hw, inative_hw = None):
+    #print("flip_light_logic", hw, inative_hw)
     if hw == "RELAY_8":
         linked_light = get_device_from_hw("RELAY_8")
         switch_light = get_device_from_hw("B4_LED1_GB")
-        optimised_led_change(switch_light, not linked_light.in_local_state)
+        inactive = get_device_from_hw(inative_hw)
+        if inactive and inactive.state:
+            optimised_led_change(switch_light, 0)
+        else:
+            optimised_led_change(switch_light, int(not linked_light.state))
 
     elif hw == "ONBOARD_LED2":
         linked_light = get_device_from_hw("ONBOARD_LED2")
         switch_light = get_device_from_hw("B4_LED2_GB")
-        optimised_led_change(switch_light, not linked_light.in_local_state)
-
+        optimised_led_change(switch_light, not linked_light.state)
+        inactive = get_device_from_hw(inative_hw)
+        if inactive and inactive.state:
+            optimised_led_change(switch_light, 0)
+        else:
+            optimised_led_change(switch_light, int(not linked_light.state))
 
 def optimised_led_change(device, state):
+    #print("optimised_led_change", device.hw, state)
     device.in_remote_state = state
-    device.in_local_state = state
-    device.out_local_state = device.in_local_state
+    device.state = state
+    device.state = device.state
     leds.set_state_by_name(device.hw, state)
 
 
 def on_button_state_change_callback(hw, state):
+    #print("on_button_state_change_callback", hw, state)
     device = get_device_from_hw(hw)
-    check_button_logic(hw, state)
+    first_time = device.state == None
     if device:
-        device.out_local_state = state
+        device.state = state
+    check_button_logic(hw, state, first_time)
 
 
 def on_sensor_state_change_callback(hw, state):
     device = get_device_from_hw(hw)
     if device:
-        device.out_local_state = state
+        device.state = state
 
 
 def on_mqtt_message_received_callback(path, state):
@@ -201,18 +215,17 @@ async def loop_async():
         await asyncio.sleep(0)
         buttons_lights_logic()
         await asyncio.sleep(0)
-        if mqtt.is_connected():
-            for device in devices:
-                if device.out_path:
-                    if device.out_local_state != device.out_remote_state and device.out_local_state != None:
-                        device.out_remote_state = device.out_local_state
-                        await mqtt.send_message(device.out_path, str(device.out_remote_state))
-                await asyncio.sleep(0)
-                if device.in_path:
-                    if device.in_remote_state != device.in_local_state and device.in_remote_state != None:
-                        device.in_local_state = device.in_remote_state
-                        leds.set_state_by_name(device.hw, device.in_remote_state)
-                        if device.out_path:
-                            device.out_local_state = device.in_local_state
-                        flip_light_logic(device.hw)
-                await asyncio.sleep(0)
+        for device in devices:
+            if device.out_path and mqtt.is_connected():
+                if device.state != device.out_remote_state and device.state != None:
+                    device.out_remote_state = device.state
+                    await mqtt.send_message(device.out_path, str(device.out_remote_state))
+            await asyncio.sleep(0)
+            if device.in_path:
+                if device.in_remote_state != device.state and device.in_remote_state != None:
+                    device.state = device.in_remote_state
+                    leds.set_state_by_name(device.hw, device.in_remote_state)
+                    if device.out_path:
+                        device.state = device.state
+                    flip_light_logic(device.hw)
+            await asyncio.sleep(0)
