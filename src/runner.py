@@ -6,6 +6,7 @@ import sensors
 import mqtt
 import cli
 import sync_data
+import signal_leds
 
 
 async def process_time_measure(timeout=20):
@@ -42,10 +43,11 @@ async def add_tasks():
     tasks.append(asyncio.create_task(sensors.environment_sensors_action()))
     tasks.append(asyncio.create_task(mqtt.loop_async()))
     tasks.append(asyncio.create_task(common.loop_async("CLI", cli.action)))
+    tasks.append(asyncio.create_task(signal_leds.action()))
     tasks.append(asyncio.create_task(process_time_measure()))
     for task in tasks:
         await task
-        print("[RUNNER]: Error: loop task finished!")
+    print("[RUNNER]: Error: loop task finished!")
 
 
 def start():
