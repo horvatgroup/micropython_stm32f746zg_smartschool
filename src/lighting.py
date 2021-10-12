@@ -7,9 +7,10 @@ class Lighting:
         self.thing_main_light = thing_main_light
         self.thing_inverted_light = thing_inverted_light
         self.thing_activity_light = thing_activity_light
+        self.check = False
 
 
-lighting_pairs = (
+lightings = (
     Lighting(things.get_thing_from_hw("B4_SW1"),
              things.get_thing_from_hw("RELAY_8"),
              things.get_thing_from_hw("B4_LED1_GB"),
@@ -24,12 +25,15 @@ blinds_pairs = ()
 
 
 def check_button_logic():
-    for sl_pair in lighting_pairs:
-        things.set_state(sl_pair.thing_activity_light, sl_pair.thing_button.state)
+    for sl_pair in lightings:
         if sl_pair.thing_button.state:
-            next_state = int(not sl_pair.thing_main_light.state)
-            things.set_state(sl_pair.thing_main_light, next_state)
             things.set_state(sl_pair.thing_inverted_light, 0)
-        else:
-            inverted_next_state = int(not sl_pair.thing_main_light.state)
+            things.set_state(sl_pair.thing_activity_light, 1)
+            sl_pair.check = True
+        elif not sl_pair.thing_button.state and sl_pair.check:
+            sl_pair.check = False
+            things.set_state(sl_pair.thing_activity_light, 0)
+            next_state = int(not sl_pair.thing_main_light.state)
+            inverted_next_state = int(not next_state)
             things.set_state(sl_pair.thing_inverted_light, inverted_next_state)
+            things.set_state(sl_pair.thing_main_light, next_state)

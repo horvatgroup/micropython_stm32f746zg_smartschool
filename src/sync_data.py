@@ -25,12 +25,10 @@ def on_mqtt_message_received_callback(path, state):
 
 
 async def on_thing_sync_out(thing):
-    print("[SYNC]: on_thing_sync_out %s" % (thing.hw))
     await mqtt.send_message(thing.out_path, str(thing.out_remote_state))
 
 
 def on_thing_sync_in(thing):
-    print("[SYNC]: on_thing_sync_in %s" % (thing.hw))
     leds.set_state_by_name(thing.hw, thing.state)
 
 
@@ -45,10 +43,10 @@ def init():
 
 async def sync_things():
     for thing in things.things:
-        if thing.out_path and mqtt.is_connected():
+        if thing.out_path and thing.sync_out and mqtt.is_connected():
             await things.sync_out_remote_state(thing)
         await asyncio.sleep(0)
-        if thing.in_path:
+        if thing.in_path and thing.sync_in:
             things.sync_in_remote_state(thing)
         await asyncio.sleep(0)
 
