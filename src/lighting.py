@@ -24,6 +24,17 @@ lightings = (
 blinds_pairs = ()
 
 
+def check_inverted_light(sl_pair):
+    if not sl_pair.thing_button.state:
+        inverted_next_state = int(not sl_pair.thing_main_light.state)
+        things.set_state(sl_pair.thing_inverted_light, inverted_next_state)
+
+
+def check_inverted_lights():
+    for sl_pair in lightings:
+        check_inverted_light(sl_pair)
+
+
 def check_button_logic():
     for sl_pair in lightings:
         if sl_pair.thing_button.state:
@@ -34,6 +45,5 @@ def check_button_logic():
             sl_pair.check = False
             things.set_state(sl_pair.thing_activity_light, 0)
             next_state = int(not sl_pair.thing_main_light.state)
-            inverted_next_state = int(not next_state)
-            things.set_state(sl_pair.thing_inverted_light, inverted_next_state)
             things.set_state(sl_pair.thing_main_light, next_state)
+            check_inverted_light(sl_pair)

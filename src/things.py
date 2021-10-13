@@ -74,6 +74,7 @@ things = (
 
 on_thing_sync_out = None
 on_thing_sync_in = None
+on_thing_remote_in = None
 
 
 def get_thing_from_hw(hw):
@@ -94,6 +95,7 @@ def set_state(thing, state, soft=False):
     if thing.state != state:
         print("[THING]: set_state hw=%s, state=%s, soft=%s" % (thing.hw, state, soft))
         thing.state = state
+        thing.in_remote_state = state
         if not soft:
             if on_thing_sync_in != None:
                 on_thing_sync_in(thing)
@@ -112,6 +114,8 @@ def set_in_remote_state(path, state):
 def sync_in_remote_state(thing):
     if thing.in_remote_state != None and thing.in_remote_state != thing.state:
         set_state(thing, thing.in_remote_state)
+        if on_thing_remote_in != None:
+            on_thing_remote_in(thing)
 
 
 async def sync_out_remote_state(thing):
@@ -131,3 +135,9 @@ def register_on_thing_sync_in(func):
     print("[THING]: register_on_thing_sync_in")
     global on_thing_sync_in
     on_thing_sync_in = func
+
+
+def register_on_thing_remote_in(func):
+    print("[THING]: register_on_thing_remote_in")
+    global on_thing_remote_in
+    on_thing_remote_in = func

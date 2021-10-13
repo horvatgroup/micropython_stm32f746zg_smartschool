@@ -32,6 +32,9 @@ def on_thing_sync_in(thing):
     leds.set_state_by_name(thing.hw, thing.state)
 
 
+def on_thing_remote_in(thing):
+    lighting.check_inverted_lights()
+
 def init():
     print("[SYNC]: init")
     buttons.register_on_state_change_callback(on_button_state_change_callback)
@@ -39,6 +42,7 @@ def init():
     mqtt.register_on_message_received_callback(on_mqtt_message_received_callback)
     things.register_on_thing_sync_out(on_thing_sync_out)
     things.register_on_thing_sync_in(on_thing_sync_in)
+    things.register_on_thing_remote_in(on_thing_remote_in)
 
 
 async def sync_things():
