@@ -39,10 +39,11 @@ def on_button_pressed(button):
             things.set_state(sl_pair.thing_inverted_light, 0)
             things.set_state(sl_pair.thing_activity_light, 1)
             break
-    for bl_pair in blinds_pairs:
-        if bl_pair.enable_button == button.thing_button:
-            things.set_state(bl_pair.idle_light, 0)
-            things.set_state(bl_pair.pressed_light, 1)
+    for bl_group in blinds_pairs:
+        for bl_pair in bl_group:
+            if bl_pair.enable_button == button.thing_button:
+                things.set_state(bl_pair.idle_light, 0)
+                things.set_state(bl_pair.pressed_light, 1)
 
 
 def on_button_released(button):
@@ -54,22 +55,23 @@ def on_button_released(button):
             check_inverted_light(sl_pair)
             break
     for bl_group in blinds_pairs:
-        button_action = False
         for bl_pair in bl_group:
             if bl_pair.enable_button == button.thing_button:
                 things.set_state(bl_pair.idle_light, 1)
                 things.set_state(bl_pair.pressed_light, 0)
-            if not button_action:
-                if button.thing_button in bl_pair.disable_buttons:
-                    if bl_pair.relay.state:
-                        things.set_state(bl_pair.relay, 0)
-                        bl_pair.timestamp = 0
-                        button_action = True
-                elif button.thing_button == bl_pair.enable_button:
-                    if not bl_pair.relay.state:
-                        things.set_state(bl_pair.relay, 1)
-                        bl_pair.timestamp = common.get_millis()
-                        button_action = True
+        button_action = False
+        for bl_pair in bl_group:
+            if not button_action and button.thing_button in bl_pair.disable_buttons and bl_pair.relay.state:
+                things.set_state(bl_pair.relay, 0)
+                bl_pair.timestamp = 0
+                button_action = True
+        if not button_action:
+            for bl_pair in bl_group:
+                if not button_action and button.thing_button == bl_pair.enable_button and not bl_pair.relay.state:
+                    things.set_state(bl_pair.relay, 1)
+                    bl_pair.timestamp = common.get_millis()
+                    button_action = True
+
 
 
 def check_init_lights():
@@ -150,6 +152,16 @@ def check_blinds_timeouts():
             if bl_pair.relay.state and common.millis_passed(bl_pair.timestamp) >= bl_pair.enabled_timeout:
                 things.set_state(bl_pair.relay, 0)
                 bl_pair.timestamp = 0
+
+
+def handle_external_blinds_control(thing):
+    for bl_group in blinds_pairs:
+        for bl_pair in bl_group:
+            if bl_pair.relay == thing:
+                if bl_pair.relay.state:
+                    bl_pair.timestamp = common.get_millis()
+                else:
+                    bl_pair.timestamp = 0
 
 
 async def action():

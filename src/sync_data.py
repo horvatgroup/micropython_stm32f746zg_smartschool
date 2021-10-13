@@ -34,6 +34,7 @@ def on_thing_sync_in(thing):
 
 def on_thing_remote_in(thing):
     lighting.check_inverted_lights()
+    lighting.handle_external_blinds_control(thing)
 
 def init():
     print("[SYNC]: init")
