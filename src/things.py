@@ -39,9 +39,9 @@ things = (
     Thing("S2_LIGHT", out_path="out/S1/light"),
     Thing("S2_CO2", out_path="out/S1/co2"),
     # outputs
-    Thing("ONBOARD_LED1", in_path="in/test/led1", out_path="out/test/led1"),
+    Thing("ONBOARD_LED1", in_path="in/test/led1", out_path="out/test/led1", sync_out=False),
     Thing("ONBOARD_LED2", in_path="in/test/led2", out_path="out/test/led2"),
-    Thing("ONBOARD_LED3", in_path="in/test/led3", out_path="out/test/led3"),
+    Thing("ONBOARD_LED3", in_path="in/test/led3", out_path="out/test/led3", sync_out=False),
     Thing("RELAY_1", in_path="in/R/relay8", out_path="out/R/relay8"),
     Thing("RELAY_2", in_path="in/R/relay7", out_path="out/R/relay7"),
     Thing("RELAY_3", in_path="in/R/relay6", out_path="out/R/relay6"),
