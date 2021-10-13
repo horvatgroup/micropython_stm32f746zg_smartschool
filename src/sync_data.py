@@ -57,7 +57,7 @@ async def sync_things():
 
 async def loop_async():
     print("[SYNC]: loop async")
-    lighting.check_inverted_lights()
+    lighting.check_init_lights()
     while True:
         await sync_things()
         await asyncio.sleep(0)
