@@ -7,7 +7,7 @@ interrupt_pin = None
 state = 0
 kwh = 0
 impulses = 0
-IMPULSES_PER_KWH = 800
+IMPULSES_PER_KWH = 500
 measure_timeout = 60*1000
 measure_timestamp = 0
 lock = mutex.Mutex()
@@ -53,4 +53,4 @@ def test():
     init()
     while True:
         loop()
-        time.sleep_ms(30000)
+        time.sleep_ms(15*60000)
