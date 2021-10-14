@@ -110,6 +110,14 @@ lightings = [
              thing_main_light=things.get_thing_from_hw("RELAY_7"),
              thing_inverted_light=things.get_thing_from_hw("B4_LED2_GB"),
              thing_activity_light=things.get_thing_from_hw("B4_LED2_R")),
+    Lighting(thing_button=things.get_thing_from_hw("B3_SW1"),
+             thing_main_light=things.get_thing_from_hw("RELAY_6"),
+             thing_inverted_light=things.get_thing_from_hw("B3_LED1_GB"),
+             thing_activity_light=things.get_thing_from_hw("B3_LED1_R")),
+    #Lighting(thing_button=things.get_thing_from_hw("B3_SW2"),
+    #         thing_main_light=things.get_thing_from_hw("RELAY_5"),
+    #         thing_inverted_light=things.get_thing_from_hw("B3_LED2_GB"),
+    #         thing_activity_light=things.get_thing_from_hw("B3_LED2_R")),
 ]
 
 
@@ -126,21 +134,39 @@ class RelayControl:
 
 blinds_pairs = [
     [
-        RelayControl(relay=things.get_thing_from_hw("RELAY_6"),
-                     idle_light=things.get_thing_from_hw("B3_LED1_GB"),
-                     pressed_light=things.get_thing_from_hw("B3_LED1_R"),
-                     enable_button=things.get_thing_from_hw("B3_SW1"),
+        RelayControl(relay=things.get_thing_from_hw("RELAY_4"),
+                     idle_light=things.get_thing_from_hw("B2_LED1_GB"),
+                     pressed_light=things.get_thing_from_hw("B2_LED1_R"),
+                     enable_button=things.get_thing_from_hw("B2_SW1"),
                      disable_buttons=[
-                         things.get_thing_from_hw("B3_SW1"),
-                         things.get_thing_from_hw("B3_SW2")
+                         things.get_thing_from_hw("B2_SW1"),
+                         things.get_thing_from_hw("B2_SW2")
                      ]),
-        RelayControl(relay=things.get_thing_from_hw("RELAY_5"),
-                     idle_light=things.get_thing_from_hw("B3_LED2_GB"),
-                     pressed_light=things.get_thing_from_hw("B3_LED2_R"),
-                     enable_button=things.get_thing_from_hw("B3_SW2"),
+        RelayControl(relay=things.get_thing_from_hw("RELAY_3"),
+                     idle_light=things.get_thing_from_hw("B2_LED2_GB"),
+                     pressed_light=things.get_thing_from_hw("B2_LED2_R"),
+                     enable_button=things.get_thing_from_hw("B2_SW2"),
                      disable_buttons=[
-                         things.get_thing_from_hw("B3_SW1"),
-                         things.get_thing_from_hw("B3_SW2")
+                         things.get_thing_from_hw("B2_SW1"),
+                         things.get_thing_from_hw("B2_SW2")
+                     ])
+    ],
+    [
+        RelayControl(relay=things.get_thing_from_hw("RELAY_2"),
+                     idle_light=things.get_thing_from_hw("B1_LED1_GB"),
+                     pressed_light=things.get_thing_from_hw("B1_LED1_R"),
+                     enable_button=things.get_thing_from_hw("B1_SW1"),
+                     disable_buttons=[
+                         things.get_thing_from_hw("B1_SW1"),
+                         things.get_thing_from_hw("B1_SW2")
+                     ]),
+        RelayControl(relay=things.get_thing_from_hw("RELAY_1"),
+                     idle_light=things.get_thing_from_hw("B1_LED2_GB"),
+                     pressed_light=things.get_thing_from_hw("B1_LED2_R"),
+                     enable_button=things.get_thing_from_hw("B1_SW2"),
+                     disable_buttons=[
+                         things.get_thing_from_hw("B1_SW1"),
+                         things.get_thing_from_hw("B1_SW2")
                      ])
     ]
 ]
