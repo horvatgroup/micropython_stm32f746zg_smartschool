@@ -122,7 +122,7 @@ lightings = [
 
 
 class RelayControl:
-    def __init__(self, relay, idle_light, pressed_light, enable_button, disable_buttons, enabled_timeout=20000):
+    def __init__(self, relay, idle_light, pressed_light, enable_button, disable_buttons, enabled_timeout=60000):
         self.relay = relay
         self.idle_light = idle_light
         self.pressed_light = pressed_light

@@ -2,7 +2,7 @@ import uasyncio as asyncio
 import lan
 from lib_mqtt_as import MQTTClient
 
-DEFAULT_SERVER = '192.168.88.42'
+DEFAULT_SERVER = '10.200.60.60'
 MQTT_IP_FILENAME = "mqtt_ip.txt"
 SUBSCRIBE = None
 PUBLISH_PREFIX = None
