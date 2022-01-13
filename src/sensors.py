@@ -11,13 +11,14 @@ on_state_change_cb = None
 
 
 class Radar:
-    def __init__(self, pin, on_change=None, name="RADAR", sensor_board=""):
+    def __init__(self, pin, timeout=3, on_change=None, name="RADAR", sensor_board=""):
         self.input = common.create_input(pin)
         self.biggest = 0
         self.on_change = on_change
         self.name = name
         self.sensor_board = sensor_board
         self.data = 2  # data is binary
+        self.timeout = timeout
 
     def read(self):
         data = self.input.value()
@@ -37,7 +38,7 @@ class Radar:
 
 
 class Environment:
-    def __init__(self, i2c, on_change=None, name="ENV", sensor_board=""):
+    def __init__(self, i2c, timeout=3, on_change=None, name="ENV", sensor_board=""):
         self.i2c = i2c
         self.sensor = None
         self.biggest = 0
@@ -59,6 +60,7 @@ class Environment:
         self.disable_error_print = False
         self.diff_timeout = 120 * 60000
         self.diff_timestamp = 0
+        self.timeout = timeout
 
     def get_sensor(self):
         if self.sensor != None:
@@ -102,7 +104,7 @@ class Environment:
 
 
 class Light:
-    def __init__(self, i2c, on_change=None, name="LIGHT", sensor_board=""):
+    def __init__(self, i2c, timeout=3, on_change=None, name="LIGHT", sensor_board=""):
         self.i2c = i2c
         self.biggest = 0
         self.on_change = on_change
@@ -113,6 +115,7 @@ class Light:
         self.disable_error_print = False
         self.diff_timeout = 120 * 60000
         self.diff_timestamp = 0
+        self.timeout = timeout
 
     def read(self):
         try:
@@ -141,7 +144,7 @@ class Light:
 
 
 class Co2:
-    def __init__(self, uart, on_change=None, name="CO2", sensor_board=""):
+    def __init__(self, uart, timeout=3, on_change=None, name="CO2", sensor_board=""):
         self.uart = uart
         self.sensor = None
         self.biggest = 0
@@ -153,6 +156,7 @@ class Co2:
         self.disable_error_print = False
         self.diff_timeout = 120 * 60000
         self.diff_timestamp = 0
+        self.timeout = timeout
 
     def get_sensor(self):
         if self.sensor != None:

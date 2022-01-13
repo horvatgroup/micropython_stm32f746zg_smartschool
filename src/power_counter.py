@@ -34,7 +34,7 @@ def register_on_state_change_callback(cb):
 
 def action():
     global diff_timestamp, sent_impulses
-    if total_kwh() >= diff_value or common.millis_passed(diff_timestamp) >= diff_timeout:
+    if (impulses / IMPULSES_PER_KWH) >= diff_value or common.millis_passed(diff_timestamp) >= diff_timeout:
         sent_impulses = impulses
         value = sent_impulses / IMPULSES_PER_KWH
         diff_timestamp = common.get_millis()
