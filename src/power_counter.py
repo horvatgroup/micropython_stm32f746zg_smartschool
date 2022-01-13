@@ -3,9 +3,8 @@ import common_pins
 import time
 
 interrupt_pin = None
-state = 0
-kwh = 0
 impulses = 0
+sent_impulses = 0
 IMPULSES_PER_KWH = 500
 on_state_change_cb = None
 diff_value = 2.2
@@ -13,16 +12,12 @@ diff_timeout = 30 * 60000
 diff_timestamp = 0
 
 
-def total_kwh():
-    return kwh + impulses / IMPULSES_PER_KWH
-
-
 def on_interrupt(pin):
-    global impulses, kwh
+    global impulses, sent_impulses
+    if sent_impulses:
+        impulses = impulses - sent_impulses
+        sent_impulses = 0
     impulses += 1
-    if (impulses == IMPULSES_PER_KWH):
-        kwh += 1
-        impulses = 0
 
 
 def init():
@@ -38,11 +33,10 @@ def register_on_state_change_callback(cb):
 
 
 def action():
-    global diff_timestamp
+    global diff_timestamp, sent_impulses
     if total_kwh() >= diff_value or common.millis_passed(diff_timestamp) >= diff_timeout:
-        value = total_kwh()
-        kwh = 0
-        impulses = 0
+        sent_impulses = impulses
+        value = sent_impulses / IMPULSES_PER_KWH
         diff_timestamp = common.get_millis()
         print("[POWER_COUNTER]: %f kwh" % (value))
         if on_state_change_cb != None:
