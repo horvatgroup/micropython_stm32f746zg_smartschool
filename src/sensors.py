@@ -11,9 +11,8 @@ on_state_change_cb = None
 
 
 class Radar:
-    def __init__(self, pin, timeout=3, on_change=None, name="RADAR", sensor_board=""):
+    def __init__(self, pin, on_change=None, name="RADAR", sensor_board=""):
         self.input = common.create_input(pin)
-        self.timeout = timeout
         self.biggest = 0
         self.on_change = on_change
         self.name = name
@@ -38,10 +37,9 @@ class Radar:
 
 
 class Environment:
-    def __init__(self, i2c, timeout=3, on_change=None, name="ENV", sensor_board=""):
+    def __init__(self, i2c, on_change=None, name="ENV", sensor_board=""):
         self.i2c = i2c
         self.sensor = None
-        self.timeout = timeout
         self.biggest = 0
         self.on_change = on_change
         self.name = name
@@ -59,6 +57,8 @@ class Environment:
         self.diff['ALTITUDE'] = 0.1
         self.diff['HUMIDITY'] = 3.0
         self.disable_error_print = False
+        self.diff_timeout = 120 * 60000
+        self.diff_timestamp = 0
 
     def get_sensor(self):
         if self.sensor != None:
@@ -80,9 +80,11 @@ class Environment:
                 data = self.get_sensor().read()
                 self.disable_error_print = False
                 for key in data:
+                    force_send = self.diff_timestamp != 0 and (common.millis_passed(self.diff_timestamp) >= self.diff_timeout)
                     diff = abs(data[key] - self.data[key])
-                    if diff != 0 and diff > self.diff[key]:
+                    if (diff != 0 and diff > self.diff[key]) or force_send:
                         self.data[key] = data[key]
+                        self.diff_timestamp = common.get_millis()
                         if self.on_change:
                             self.on_change("%s_%s" % (self.get_name(), key), self.data[key])
             except Exception as e:
@@ -100,9 +102,8 @@ class Environment:
 
 
 class Light:
-    def __init__(self, i2c, timeout=3, on_change=None, name="LIGHT", sensor_board=""):
+    def __init__(self, i2c, on_change=None, name="LIGHT", sensor_board=""):
         self.i2c = i2c
-        self.timeout = timeout
         self.biggest = 0
         self.on_change = on_change
         self.name = name
@@ -110,14 +111,18 @@ class Light:
         self.data = 0
         self.diff = 50
         self.disable_error_print = False
+        self.diff_timeout = 120 * 60000
+        self.diff_timestamp = 0
 
     def read(self):
         try:
             data = driver_bh1750fvi.sample(self.i2c)
             self.disable_error_print = False
+            force_send = self.diff_timestamp != 0 and (common.millis_passed(self.diff_timestamp) >= self.diff_timeout)
             diff = abs(data - self.data)
-            if diff != 0 and diff > self.diff:
+            if (diff != 0 and diff > self.diff) or force_send:
                 self.data = data
+                self.diff_timestamp = common.get_millis()
                 if self.on_change:
                     self.on_change(self.get_name(), self.data)
         except Exception as e:
@@ -136,10 +141,9 @@ class Light:
 
 
 class Co2:
-    def __init__(self, uart, timeout=3, on_change=None, name="CO2", sensor_board=""):
+    def __init__(self, uart, on_change=None, name="CO2", sensor_board=""):
         self.uart = uart
         self.sensor = None
-        self.timeout = timeout
         self.biggest = 0
         self.on_change = on_change
         self.name = name
@@ -147,6 +151,8 @@ class Co2:
         self.data = 0
         self.diff = 100
         self.disable_error_print = False
+        self.diff_timeout = 120 * 60000
+        self.diff_timestamp = 0
 
     def get_sensor(self):
         if self.sensor != None:
@@ -166,9 +172,11 @@ class Co2:
                 data = self.get_sensor().measure()
                 self.disable_error_print = False
                 if data:
+                    force_send = self.diff_timestamp != 0 and (common.millis_passed(self.diff_timestamp) >= self.diff_timeout)
                     diff = abs(data - self.data)
-                    if diff != 0 and diff > self.diff:
+                    if (diff != 0 and diff > self.diff) or force_send:
                         self.data = data
+                        self.diff_timestamp = common.get_millis()
                         if self.on_change:
                             self.on_change(self.get_name(), self.data)
             except Exception as e:
