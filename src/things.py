@@ -39,6 +39,7 @@ things = (
     Thing("S2_LIGHT", out_path="out/S1/light"),
     Thing("S2_CO2", out_path="out/S1/co2"),
     Thing("POWER_COUNTER", out_path="out/power_counter"),
+    Thing("VERSION", out_path="out/version"),
     # outputs
     Thing("ONBOARD_LED1", in_path="in/test/led1", out_path="out/test/led1", sync_out=False),
     Thing("ONBOARD_LED2", in_path="in/test/led2", out_path="out/test/led2"),

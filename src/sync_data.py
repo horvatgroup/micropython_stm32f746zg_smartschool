@@ -6,6 +6,7 @@ import leds
 import things
 import lighting
 import power_counter
+import version
 
 
 def on_button_state_change_callback(hw, state):
@@ -47,6 +48,8 @@ def init():
     things.register_on_thing_sync_out(on_thing_sync_out)
     things.register_on_thing_sync_in(on_thing_sync_in)
     things.register_on_thing_remote_in(on_thing_remote_in)
+    v = things.get_thing_from_hw("VERSION")
+    things.set_state(v, version.VERSION, True)
 
 
 async def sync_things():
