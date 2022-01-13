@@ -53,11 +53,11 @@ class Environment:
         self.data['ALTITUDE'] = 0.0
         self.data['HUMIDITY'] = 0.0
         self.diff = {}
-        self.diff['TEMPERATURE'] = 1.0
-        self.diff['PRESSURE'] = 0.1
-        self.diff['GAS'] = 1
+        self.diff['TEMPERATURE'] = 0.5
+        self.diff['PRESSURE'] = 3.0
+        self.diff['GAS'] = 5000
         self.diff['ALTITUDE'] = 0.1
-        self.diff['HUMIDITY'] = 0.1
+        self.diff['HUMIDITY'] = 3.0
         self.disable_error_print = False
 
     def get_sensor(self):
@@ -108,7 +108,7 @@ class Light:
         self.name = name
         self.sensor_board = sensor_board
         self.data = 0
-        self.diff = 1
+        self.diff = 50
         self.disable_error_print = False
 
     def read(self):
@@ -145,7 +145,7 @@ class Co2:
         self.name = name
         self.sensor_board = sensor_board
         self.data = 0
-        self.diff = 1
+        self.diff = 100
         self.disable_error_print = False
 
     def get_sensor(self):
