@@ -8,6 +8,7 @@ import cli
 import sync_data
 import signal_leds
 import lighting
+import power_counter
 
 
 async def process_time_measure(timeout=20):
@@ -29,6 +30,7 @@ def init():
     buttons.init()
     leds.init()
     sensors.init()
+    power_counter.init()
     mqtt.init()
     cli.init()
     sync_data.init()
@@ -42,6 +44,7 @@ async def add_tasks():
     tasks.append(asyncio.create_task(common.loop_async("LEDS", leds.action)))
     tasks.append(asyncio.create_task(sensors.realtime_sensors_action()))
     tasks.append(asyncio.create_task(sensors.environment_sensors_action()))
+    tasks.append(asyncio.create_task(common.loop_async("POWER_COUNTER", power_counter.action)))
     tasks.append(asyncio.create_task(mqtt.loop_async()))
     tasks.append(asyncio.create_task(common.loop_async("CLI", cli.action)))
     tasks.append(asyncio.create_task(signal_leds.action()))

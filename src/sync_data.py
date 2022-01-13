@@ -5,6 +5,7 @@ import sensors
 import leds
 import things
 import lighting
+import power_counter
 
 
 def on_button_state_change_callback(hw, state):
@@ -36,10 +37,12 @@ def on_thing_remote_in(thing):
     lighting.check_inverted_lights()
     lighting.handle_external_blinds_control(thing)
 
+
 def init():
     print("[SYNC]: init")
     buttons.register_on_state_change_callback(on_button_state_change_callback)
     sensors.register_on_state_change_callback(on_sensor_state_change_callback)
+    power_counter.register_on_state_change_callback(on_sensor_state_change_callback)
     mqtt.register_on_message_received_callback(on_mqtt_message_received_callback)
     things.register_on_thing_sync_out(on_thing_sync_out)
     things.register_on_thing_sync_in(on_thing_sync_in)
