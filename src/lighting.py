@@ -103,11 +103,11 @@ class Lighting:
 
 lightings = [
     Lighting(thing_button=things.get_thing_from_hw("B4_SW1"),
-             thing_main_light=things.get_thing_from_hw("RELAY_9"),
+             thing_main_light=things.get_thing_from_hw("RELAY_11"),
              thing_inverted_light=things.get_thing_from_hw("B4_LED1_GB"),
              thing_activity_light=things.get_thing_from_hw("B4_LED1_R")),
     Lighting(thing_button=things.get_thing_from_hw("B4_SW2"),
-             thing_main_light=things.get_thing_from_hw("RELAY_10"),
+             thing_main_light=things.get_thing_from_hw("RELAY_12"),
              thing_inverted_light=things.get_thing_from_hw("B4_LED2_GB"),
              thing_activity_light=things.get_thing_from_hw("B4_LED2_R")),
     Lighting(thing_button=things.get_thing_from_hw("B3_SW1"),
