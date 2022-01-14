@@ -22,7 +22,7 @@ class Radar:
         self.on_change = on_change
         self.name = name
         self.sensor_board = sensor_board
-        self.data = 2  # data is binary
+        self.data = -1  # data is binary
         self.timeout = timeout
 
     def read(self):
@@ -51,11 +51,11 @@ class Environment:
         self.name = name
         self.sensor_board = sensor_board
         self.data = {}
-        self.data['TEMPERATURE'] = 0.0
-        self.data['PRESSURE'] = 0.0
-        self.data['GAS'] = 0
-        self.data['ALTITUDE'] = 0.0
-        self.data['HUMIDITY'] = 0.0
+        self.data['TEMPERATURE'] = -100.0
+        self.data['PRESSURE'] = -1.0
+        self.data['GAS'] = -1
+        self.data['ALTITUDE'] = -1.0
+        self.data['HUMIDITY'] = -1.0
         self.diff = {}
         self.diff['TEMPERATURE'] = 0.5
         self.diff['PRESSURE'] = 3.0
@@ -121,7 +121,7 @@ class Light:
         self.on_change = on_change
         self.name = name
         self.sensor_board = sensor_board
-        self.data = 0
+        self.data = -1.0
         self.diff = 50
         self.disable_error_print = False
         self.diff_timeout = 120 * 60000
@@ -162,7 +162,7 @@ class Co2:
         self.on_change = on_change
         self.name = name
         self.sensor_board = sensor_board
-        self.data = 0
+        self.data = -1
         self.diff = 100
         self.disable_error_print = False
         self.diff_timeout = 120 * 60000
