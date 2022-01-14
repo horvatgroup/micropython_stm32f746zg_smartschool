@@ -1,6 +1,5 @@
 import common
 import common_pins
-import time
 
 interrupt_pin = None
 impulses = 0
