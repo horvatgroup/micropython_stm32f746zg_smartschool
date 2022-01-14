@@ -9,6 +9,11 @@ environment_sensors = []
 realtime_sensors = []
 on_state_change_cb = None
 
+def get_diff(first, second):
+    if (first >= 0 and second >= 0) or (first < 0 and second < 0):
+        return abs(first - second)
+    else:
+        return abs(first) + abs(second)
 
 class Radar:
     def __init__(self, pin, timeout=3, on_change=None, name="RADAR", sensor_board=""):
@@ -55,11 +60,16 @@ class Environment:
         self.diff['TEMPERATURE'] = 0.5
         self.diff['PRESSURE'] = 3.0
         self.diff['GAS'] = 5000
-        self.diff['ALTITUDE'] = 0.1
+        self.diff['ALTITUDE'] = 100.0
         self.diff['HUMIDITY'] = 3.0
         self.disable_error_print = False
         self.diff_timeout = 120 * 60000
-        self.diff_timestamp = 0
+        self.diff_timestamp = {}
+        self.diff_timestamp['TEMPERATURE'] = 0
+        self.diff_timestamp['PRESSURE'] = 0
+        self.diff_timestamp['GAS'] = 0
+        self.diff_timestamp['ALTITUDE'] = 0
+        self.diff_timestamp['HUMIDITY'] = 0
         self.timeout = timeout
 
     def get_sensor(self):
@@ -82,11 +92,11 @@ class Environment:
                 data = self.get_sensor().read()
                 self.disable_error_print = False
                 for key in data:
-                    force_send = self.diff_timestamp != 0 and (common.millis_passed(self.diff_timestamp) >= self.diff_timeout)
-                    diff = abs(data[key] - self.data[key])
+                    force_send = self.diff_timestamp[key] != 0 and (common.millis_passed(self.diff_timestamp[key]) >= self.diff_timeout)
+                    diff = get_diff(data[key], self.data[key])
                     if (diff != 0 and diff > self.diff[key]) or force_send:
                         self.data[key] = data[key]
-                        self.diff_timestamp = common.get_millis()
+                        self.diff_timestamp[key] = common.get_millis()
                         if self.on_change:
                             self.on_change("%s_%s" % (self.get_name(), key), self.data[key])
             except Exception as e:
@@ -106,6 +116,7 @@ class Environment:
 class Light:
     def __init__(self, i2c, timeout=3, on_change=None, name="LIGHT", sensor_board=""):
         self.i2c = i2c
+        self.timeout = timeout
         self.biggest = 0
         self.on_change = on_change
         self.name = name
@@ -115,14 +126,13 @@ class Light:
         self.disable_error_print = False
         self.diff_timeout = 120 * 60000
         self.diff_timestamp = 0
-        self.timeout = timeout
 
     def read(self):
         try:
             data = driver_bh1750fvi.sample(self.i2c)
             self.disable_error_print = False
             force_send = self.diff_timestamp != 0 and (common.millis_passed(self.diff_timestamp) >= self.diff_timeout)
-            diff = abs(data - self.data)
+            diff = get_diff(data, self.data)
             if (diff != 0 and diff > self.diff) or force_send:
                 self.data = data
                 self.diff_timestamp = common.get_millis()
@@ -147,6 +157,7 @@ class Co2:
     def __init__(self, uart, timeout=3, on_change=None, name="CO2", sensor_board=""):
         self.uart = uart
         self.sensor = None
+        self.timeout = timeout
         self.biggest = 0
         self.on_change = on_change
         self.name = name
@@ -156,7 +167,6 @@ class Co2:
         self.disable_error_print = False
         self.diff_timeout = 120 * 60000
         self.diff_timestamp = 0
-        self.timeout = timeout
 
     def get_sensor(self):
         if self.sensor != None:
@@ -177,7 +187,7 @@ class Co2:
                 self.disable_error_print = False
                 if data:
                     force_send = self.diff_timestamp != 0 and (common.millis_passed(self.diff_timestamp) >= self.diff_timeout)
-                    diff = abs(data - self.data)
+                    diff = get_diff(data, self.data)
                     if (diff != 0 and diff > self.diff) or force_send:
                         self.data = data
                         self.diff_timestamp = common.get_millis()
