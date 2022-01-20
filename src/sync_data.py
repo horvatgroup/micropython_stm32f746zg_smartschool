@@ -16,10 +16,10 @@ def on_button_state_change_callback(hw, state):
         lighting.check_button_logic()
 
 
-def on_sensor_state_change_callback(hw, state):
+def on_sensor_state_change_callback(hw, state, sync_out_force_update=False):
     thing = things.get_thing_from_hw(hw)
     if thing:
-        things.set_state(thing, state, soft=True)
+        things.set_state(thing, state, soft=True, sync_out_force_update=sync_out_force_update)
 
 
 def on_mqtt_message_received_callback(path, state):
@@ -41,6 +41,8 @@ def on_thing_remote_in(thing):
 
 def init():
     print("[SYNC]: init")
+    v = things.get_thing_from_hw("VERSION")
+    things.set_state(v, version.VERSION, True)
     buttons.register_on_state_change_callback(on_button_state_change_callback)
     sensors.register_on_state_change_callback(on_sensor_state_change_callback)
     power_counter.register_on_state_change_callback(on_sensor_state_change_callback)
@@ -48,8 +50,6 @@ def init():
     things.register_on_thing_sync_out(on_thing_sync_out)
     things.register_on_thing_sync_in(on_thing_sync_in)
     things.register_on_thing_remote_in(on_thing_remote_in)
-    v = things.get_thing_from_hw("VERSION")
-    things.set_state(v, version.VERSION, True)
 
 
 async def sync_things():

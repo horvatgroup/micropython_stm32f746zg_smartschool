@@ -48,5 +48,5 @@ cp firmware.* ../../../../micropython_stm32f746zg_smartschool/build-NUCLEO_F746Z
 - install `sudo pacman -S mosquitto`
 - add `listener 1883` and `allow_anonymous true` to `/etc/mosquitto/mosquitto.conf`
 - start `sudo systemctl start mosquitto`
-- subscriber `mosquitto_sub -t home/frontgarden/doorbell`
-- publisher `mosquitto_pub -t home/frontgarden/doorbell -m "test message"`
+- subscriber `mosquitto_sub -h <IP> -p 1883 -v -t '#' -F "%I %t %p"`
+- publisher `mosquitto_pub -t mac/in/R/relay8 -m "1"`

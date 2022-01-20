@@ -8,9 +8,12 @@ class Thing:
         self.state = None
         self.sync_in = sync_in
         self.sync_out = sync_out
+        self.sync_out_force_update = False
 
 
 things = (
+    # debug
+    Thing("VERSION", out_path="out/version"),
     # inputs
     Thing("ONBOARD_BUTTON", out_path="out/test/button1"),
     Thing("B1_SW1", out_path="out/B4/SW1", sync_out=False),
@@ -39,7 +42,6 @@ things = (
     Thing("S2_LIGHT", out_path="out/S1/light"),
     Thing("S2_CO2", out_path="out/S1/co2"),
     Thing("POWER_COUNTER", out_path="out/power_counter"),
-    Thing("VERSION", out_path="out/version"),
     # outputs
     Thing("ONBOARD_LED1", in_path="in/test/led1", out_path="out/test/led1", sync_out=False),
     Thing("ONBOARD_LED2", in_path="in/test/led2", out_path="out/test/led2"),
@@ -93,11 +95,12 @@ def get_thing_from_path(path):
     return None
 
 
-def set_state(thing, state, soft=False):
-    if thing.state != state:
+def set_state(thing, state, soft=False, sync_out_force_update=False):
+    if thing.state != state or sync_out_force_update != False:
         print("[THING]: set_state hw=%s, state=%s, soft=%s" % (thing.hw, state, soft))
         thing.state = state
         thing.in_remote_state = state
+        thing.sync_out_force_update = sync_out_force_update
         if not soft:
             if on_thing_sync_in != None:
                 on_thing_sync_in(thing)
@@ -121,8 +124,9 @@ def sync_in_remote_state(thing):
 
 
 async def sync_out_remote_state(thing):
-    if thing.state != None and thing.state != thing.out_remote_state:
+    if thing.state != None and (thing.state != thing.out_remote_state or thing.sync_out_force_update != False):
         thing.out_remote_state = thing.state
+        thing.sync_out_force_update = False
         if on_thing_sync_out != None:
             await on_thing_sync_out(thing)
 

@@ -9,11 +9,13 @@ environment_sensors = []
 realtime_sensors = []
 on_state_change_cb = None
 
+
 def get_diff(first, second):
     if (first >= 0 and second >= 0) or (first < 0 and second < 0):
         return abs(first - second)
     else:
         return abs(first) + abs(second)
+
 
 class Radar:
     def __init__(self, pin, timeout=3, on_change=None, name="RADAR", sensor_board=""):
@@ -51,11 +53,11 @@ class Environment:
         self.name = name
         self.sensor_board = sensor_board
         self.data = {}
-        self.data['TEMPERATURE'] = -100.0
-        self.data['PRESSURE'] = -1.0
-        self.data['GAS'] = -1
-        self.data['ALTITUDE'] = -1.0
-        self.data['HUMIDITY'] = -1.0
+        self.data['TEMPERATURE'] = 0
+        self.data['PRESSURE'] = 0
+        self.data['GAS'] = 0
+        self.data['ALTITUDE'] = 0
+        self.data['HUMIDITY'] = 0
         self.diff = {}
         self.diff['TEMPERATURE'] = 0.5
         self.diff['PRESSURE'] = 3.0
@@ -92,7 +94,7 @@ class Environment:
                 data = self.get_sensor().read()
                 self.disable_error_print = False
                 for key in data:
-                    force_send = self.diff_timestamp[key] != 0 and (common.millis_passed(self.diff_timestamp[key]) >= self.diff_timeout)
+                    force_send = self.diff_timestamp[key] == 0 or (common.millis_passed(self.diff_timestamp[key]) >= self.diff_timeout)
                     diff = get_diff(data[key], self.data[key])
                     if (diff != 0 and diff > self.diff[key]) or force_send:
                         self.data[key] = data[key]
@@ -121,7 +123,7 @@ class Light:
         self.on_change = on_change
         self.name = name
         self.sensor_board = sensor_board
-        self.data = -1.0
+        self.data = 0
         self.diff = 50
         self.disable_error_print = False
         self.diff_timeout = 120 * 60000
@@ -131,7 +133,7 @@ class Light:
         try:
             data = driver_bh1750fvi.sample(self.i2c)
             self.disable_error_print = False
-            force_send = self.diff_timestamp != 0 and (common.millis_passed(self.diff_timestamp) >= self.diff_timeout)
+            force_send = self.diff_timestamp == 0 or (common.millis_passed(self.diff_timestamp) >= self.diff_timeout)
             diff = get_diff(data, self.data)
             if (diff != 0 and diff > self.diff) or force_send:
                 self.data = data
@@ -162,7 +164,7 @@ class Co2:
         self.on_change = on_change
         self.name = name
         self.sensor_board = sensor_board
-        self.data = -1
+        self.data = 0
         self.diff = 100
         self.disable_error_print = False
         self.diff_timeout = 120 * 60000
@@ -186,7 +188,7 @@ class Co2:
                 data = self.get_sensor().measure()
                 self.disable_error_print = False
                 if data:
-                    force_send = self.diff_timestamp != 0 and (common.millis_passed(self.diff_timestamp) >= self.diff_timeout)
+                    force_send = self.diff_timestamp == 0 or (common.millis_passed(self.diff_timestamp) >= self.diff_timeout)
                     diff = get_diff(data, self.data)
                     if (diff != 0 and diff > self.diff) or force_send:
                         self.data = data
@@ -215,7 +217,7 @@ class Co2:
 def publish_results(name, data):
     print("[SENSORS]: %s -> %s" % (name, str(data)))
     if on_state_change_cb != None:
-        on_state_change_cb(name, data)
+        on_state_change_cb(name, data, sync_out_force_update=True)
 
 
 def register_on_state_change_callback(cb):
