@@ -38,7 +38,7 @@ def action():
         diff_timestamp = common.get_millis()
         print("[POWER_COUNTER]: %f kwh" % (value))
         if on_state_change_cb != None:
-            on_state_change_cb("POWER_COUNTER", value, sync_out_force_update=True)
+            on_state_change_cb("POWER_COUNTER", value)
 
 
 def test():

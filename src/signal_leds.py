@@ -2,18 +2,19 @@ import uasyncio as asyncio
 import leds
 import mqtt
 
-import things
 
-boot_led = things.get_thing_from_hw("ONBOARD_LED1")
-mqtt_led = things.get_thing_from_hw("ONBOARD_LED3")
+# boot_led = things.get_thing_from_hw("ONBOARD_LED1")
+# mqtt_led = things.get_thing_from_hw("ONBOARD_LED3")
 
 
 def check_signal_led_boot():
-    things.set_state(boot_led, 1)
+    # things.set_state(boot_led, 1)
+    pass
 
 
 def check_signal_led_mqtt(state):
-    things.set_state(mqtt_led, int(state))
+    # things.set_state(mqtt_led, int(state))
+    pass
 
 
 async def action():

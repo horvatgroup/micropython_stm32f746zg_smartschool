@@ -1,5 +1,4 @@
 import uasyncio as asyncio
-import things
 import common
 
 

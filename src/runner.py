@@ -1,13 +1,13 @@
 import uasyncio as asyncio
+import things
 import common
 import buttons
 import leds
 import sensors
 import mqtt
 import cli
-import sync_data
 import signal_leds
-import lighting
+# import lighting
 import power_counter
 
 
@@ -33,13 +33,13 @@ def init():
     power_counter.init()
     mqtt.init()
     cli.init()
-    sync_data.init()
+    things.init()
 
 
 async def add_tasks():
     print("[RUNNER]: add_tasks")
     tasks = []
-    tasks.append(asyncio.create_task(sync_data.loop_async()))
+    tasks.append(asyncio.create_task(things.loop_async()))
     tasks.append(asyncio.create_task(common.loop_async("BUTTONS", buttons.action)))
     tasks.append(asyncio.create_task(common.loop_async("LEDS", leds.action)))
     tasks.append(asyncio.create_task(sensors.realtime_sensors_action()))
@@ -48,7 +48,7 @@ async def add_tasks():
     tasks.append(asyncio.create_task(mqtt.loop_async()))
     tasks.append(asyncio.create_task(common.loop_async("CLI", cli.action)))
     tasks.append(asyncio.create_task(signal_leds.action()))
-    tasks.append(asyncio.create_task(lighting.action()))
+    # tasks.append(asyncio.create_task(lighting.action()))
     tasks.append(asyncio.create_task(process_time_measure()))
     for task in tasks:
         await task

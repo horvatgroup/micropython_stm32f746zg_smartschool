@@ -217,7 +217,7 @@ class Co2:
 def publish_results(name, data):
     print("[SENSORS]: %s -> %s" % (name, str(data)))
     if on_state_change_cb != None:
-        on_state_change_cb(name, data, sync_out_force_update=True)
+        on_state_change_cb(name, data)
 
 
 def register_on_state_change_callback(cb):

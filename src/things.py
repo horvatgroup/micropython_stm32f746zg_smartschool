@@ -1,163 +1,147 @@
+import uasyncio as asyncio
+import buttons
+import sensors
+import power_counter
+import mqtt
+import version
+
+
 class Thing:
-    def __init__(self, hw, in_path=None, out_path=None, sync_in=True, sync_out=True):
-        self.hw = hw
-        self.in_path = in_path
-        self.out_path = out_path
-        self.out_remote_state = None
-        self.in_remote_state = None
-        self.state = None
-        self.sync_in = sync_in
-        self.sync_out = sync_out
-        self.sync_out_force_update = False
-        self.on_remote_in_cb = None
+    def __init__(self, path=None, alias=None, ignore_duplicates_out=False, ignore_duplicates_in=False, cb_out=None, cb_in=None):
+        self.path = path
+        self.alias = alias
+        self.ignore_duplicates_out = ignore_duplicates_out
+        self.ignore_duplicates_in = ignore_duplicates_in
+        self.data = None
+        self.dirty_out = False
+        self.dirty_in = False
+        self.cb_out = None
+        self.cb_in = None
 
 
 things = (
-    # inputs
-    Thing("ONBOARD_BUTTON", out_path="out/test/button1"),
-    Thing("B1_SW1", out_path="out/B4/SW1", sync_out=False),
-    Thing("B1_SW2", out_path="out/B4/SW2", sync_out=False),
-    Thing("B2_SW1", out_path="out/B3/SW1", sync_out=False),
-    Thing("B2_SW2", out_path="out/B3/SW2", sync_out=False),
-    Thing("B3_SW1", out_path="out/B2/SW1", sync_out=False),
-    Thing("B3_SW2", out_path="out/B2/SW2", sync_out=False),
-    Thing("B4_SW1", out_path="out/B1/SW1", sync_out=False),
-    Thing("B4_SW2", out_path="out/B1/SW2", sync_out=False),
     # sensors
-    Thing("S1_RADAR", out_path="out/S2/radar"),
-    Thing("S1_ENV_TEMPERATURE", out_path="out/S2/env_temperature"),
-    Thing("S1_ENV_PRESSURE", out_path="out/S2/env_pressure"),
-    Thing("S1_ENV_GAS", out_path="out/S2/env_gas"),
-    Thing("S1_ENV_ALTITUDE", out_path="out/S2/env_altitude"),
-    Thing("S1_ENV_HUMIDITY", out_path="out/S2/env_humidity"),
-    Thing("S1_LIGHT", out_path="out/S2/light"),
-    Thing("S1_CO2", out_path="out/S2/co2"),
-    Thing("S2_RADAR", out_path="out/S1/radar"),
-    Thing("S2_ENV_TEMPERATURE", out_path="out/S1/env_temperature"),
-    Thing("S2_ENV_PRESSURE", out_path="out/S1/env_pressure"),
-    Thing("S2_ENV_GAS", out_path="out/S1/env_gas"),
-    Thing("S2_ENV_ALTITUDE", out_path="out/S1/env_altitude"),
-    Thing("S2_ENV_HUMIDITY", out_path="out/S1/env_humidity"),
-    Thing("S2_LIGHT", out_path="out/S1/light"),
-    Thing("S2_CO2", out_path="out/S1/co2"),
-    Thing("POWER_COUNTER", out_path="out/power_counter"),
+    Thing("S2/radar", alias="S1_RADAR"),
+    Thing("S2/env_temperature", alias="S1_ENV_TEMPERATURE"),
+    Thing("S2/env_pressure", alias="S1_ENV_PRESSURE"),
+    Thing("S2/env_gas", alias="S1_ENV_GAS"),
+    Thing("S2/env_altitude", alias="S1_ENV_ALTITUDE"),
+    Thing("S2/env_humidity", alias="S1_ENV_HUMIDITY"),
+    Thing("S2/light", alias="S1_LIGHT"),
+    Thing("S2/co2", alias="S1_CO2"),
+    Thing("S1/radar", alias="S2_RADAR"),
+    Thing("S1/env_temperature", alias="S2_ENV_TEMPERATURE"),
+    Thing("S1/env_pressure", alias="S2_ENV_PRESSURE"),
+    Thing("S1/env_gas", alias="S2_ENV_GAS"),
+    Thing("S1/env_altitude", alias="S2_ENV_ALTITUDE"),
+    Thing("S1/env_humidity", alias="S2_ENV_HUMIDITY"),
+    Thing("S1/light", alias="S2_LIGHT"),
+    Thing("S1/co2", alias="S2_CO2"),
+    Thing("power_counter", alias="POWER_COUNTER"),
     # outputs
-    Thing("ONBOARD_LED1", in_path="in/test/led1", out_path="out/test/led1", sync_out=False),
-    Thing("ONBOARD_LED2", in_path="in/test/led2", out_path="out/test/led2"),
-    Thing("ONBOARD_LED3", in_path="in/test/led3", out_path="out/test/led3", sync_out=False),
-    Thing("RELAY_1", in_path="in/R/relay8", out_path="out/R/relay8"),
-    Thing("RELAY_2", in_path="in/R/relay7", out_path="out/R/relay7"),
-    Thing("RELAY_3", in_path="in/R/relay6", out_path="out/R/relay6"),
-    Thing("RELAY_4", in_path="in/R/relay5", out_path="out/R/relay5"),
-    Thing("RELAY_5", in_path="in/R/relay4", out_path="out/R/relay4"),
-    Thing("RELAY_6", in_path="in/R/relay3", out_path="out/R/relay3"),
-    Thing("RELAY_7", in_path="in/R/relay2", out_path="out/R/relay2"),
-    Thing("RELAY_8", in_path="in/R/relay1", out_path="out/R/relay1"),
-    Thing("RELAY_9", in_path="in/R/relay9", out_path="out/R/relay9"),
-    Thing("RELAY_10", in_path="in/R/relay10", out_path="out/R/relay10"),
-    Thing("RELAY_11", in_path="in/R/relay11", out_path="out/R/relay11"),
-    Thing("RELAY_12", in_path="in/R/relay12", out_path="out/R/relay12"),
-    Thing("B1_LED1_GB", in_path="in/B4/SW1/GB", out_path="out/B4/SW1/GB", sync_out=False),
-    Thing("B1_LED1_R", in_path="in/B4/SW1/R", out_path="out/B4/SW1/R", sync_out=False),
-    Thing("B1_LED2_GB", in_path="in/B4/SW2/GB", out_path="out/B4/SW2/GB", sync_out=False),
-    Thing("B1_LED2_R", in_path="in/B4/SW2/R", out_path="out/B4/SW2/R", sync_out=False),
-    Thing("B2_LED1_GB", in_path="in/B3/SW1/GB", out_path="out/B3/SW1/GB", sync_out=False),
-    Thing("B2_LED1_R", in_path="in/B3/SW1/R", out_path="out/B3/SW1/R", sync_out=False),
-    Thing("B2_LED2_GB", in_path="in/B3/SW2/GB", out_path="out/B3/SW2/GB", sync_out=False),
-    Thing("B2_LED2_R", in_path="in/B3/SW2/R", out_path="out/B3/SW2/R", sync_out=False),
-    Thing("B3_LED1_GB", in_path="in/B2/SW1/GB", out_path="out/B2/SW1/GB", sync_out=False),
-    Thing("B3_LED1_R", in_path="in/B2/SW1/R", out_path="out/B2/SW1/R", sync_out=False),
-    Thing("B3_LED2_GB", in_path="in/B2/SW2/GB", out_path="out/B2/SW2/GB", sync_out=False),
-    Thing("B3_LED2_R", in_path="in/B2/SW2/R", out_path="out/B2/SW2/R", sync_out=False),
-    Thing("B4_LED1_GB", in_path="in/B1/SW1/GB", out_path="out/B1/SW1/GB", sync_out=False),
-    Thing("B4_LED1_R", in_path="in/B1/SW1/R", out_path="out/B1/SW1/R", sync_out=False),
-    Thing("B4_LED2_GB", in_path="in/B1/SW2/GB", out_path="out/B1/SW2/GB", sync_out=False),
-    Thing("B4_LED2_R", in_path="in/B1/SW2/R", out_path="out/B1/SW2/R", sync_out=False),
+    Thing("test/led1"),
+    Thing("test/led2"),
+    Thing("test/led3"),
+    Thing("R/relay8"),
+    Thing("R/relay7"),
+    Thing("R/relay6"),
+    Thing("R/relay5"),
+    Thing("R/relay4"),
+    Thing("R/relay3"),
+    Thing("R/relay2"),
+    Thing("R/relay1"),
+    Thing("R/relay9"),
+    Thing("R/relay10"),
+    Thing("R/relay11"),
+    Thing("R/relay12"),
+    Thing("B4/SW1/GB"),
+    Thing("B4/SW1/R"),
+    Thing("B4/SW2/GB"),
+    Thing("B4/SW2/R"),
+    Thing("B3/SW1/GB"),
+    Thing("B3/SW1/R"),
+    Thing("B3/SW2/GB"),
+    Thing("B3/SW2/R"),
+    Thing("B2/SW1/GB"),
+    Thing("B2/SW1/R"),
+    Thing("B2/SW2/GB"),
+    Thing("B2/SW2/R"),
+    Thing("B1/SW1/GB"),
+    Thing("B1/SW1/R"),
+    Thing("B1/SW2/GB"),
+    Thing("B1/SW2/R"),
     # logic
-    Thing("VERSION", in_path="in/version", out_path="out/version"),
+    Thing("version", cb_in=version.req_version),
 )
-
-on_thing_sync_out = None
-on_thing_sync_in = None
-
-
-def get_thing_from_hw(hw):
-    for thing in things:
-        if thing.hw == hw:
-            return thing
-    return None
 
 
 def get_thing_from_path(path):
     for thing in things:
-        if thing.in_path == path or thing.out_path == path:
+        if path == thing.path:
             return thing
     return None
 
 
-def set_state(thing, state, soft=False, sync_out_force_update=False):
-    if thing.state != state or sync_out_force_update != False:
-        print("[THING]: set_state hw=%s, state=%s, soft=%s" % (thing.hw, state, soft))
-        thing.state = state
-        thing.in_remote_state = state
-        thing.sync_out_force_update = sync_out_force_update
-        if not soft:
-            if on_thing_sync_in != None:
-                on_thing_sync_in(thing)
+def get_thing_from_alias(alias):
+    for thing in things:
+        if alias == thing.alias:
+            return thing
+    return None
 
 
-def set_state_using_hw(hw, state, soft=False, sync_out_force_update=False):
-    t = get_thing_from_hw(hw)
+def send_msg_req(t, data):
+    if t.ignore_duplicates_out:
+        if data != t.data:
+            t.dirty_out = True
+    else:
+        t.dirty_out = True
+    t.data = data
+
+
+def on_button_state_change_callback(hw, state):
+    pass
+
+
+def on_sensor_state_change_callback(hw, data):
+    t = get_thing_from_alias(hw)
     if t is not None:
-        set_state(t, state, soft, sync_out_force_update)
+        send_msg_req(t, data)
 
 
-def set_in_remote_state(path, state):
-    print("[THING]: set_in_remote_state path=%s, state=%s" % (path, state))
-    thing = get_thing_from_path(path)
-    if thing:
-        try:
-            thing.in_remote_state = int(state)
-        except Exception as e:
-            print("[THING]: ERROR probably not implemented with %s" % (e))
-
-
-def sync_in_remote_state(thing):
-    if thing.in_remote_state is not None and thing.in_remote_state != thing.state:
-        if thing.on_remote_in_cb is None:
-            set_state(thing, thing.in_remote_state)
+def on_mqtt_message_received_callback(path, msg):
+    t = get_thing_from_path(path)
+    if t is not None:
+        if t.ignore_duplicates_in:
+            if msg != t.data:
+                t.dirty_in = True
         else:
-            data = thing.in_remote_state
-            thing.in_remote_state = thing.state
-            thing.on_remote_in_cb(data)
+            t.dirty_in = True
+        t.data = msg
 
 
-async def sync_out_remote_state(thing):
-    if thing.state != None and (thing.state != thing.out_remote_state or thing.sync_out_force_update != False):
-        thing.out_remote_state = thing.state
-        thing.sync_out_force_update = False
-        if on_thing_sync_out != None:
-            await on_thing_sync_out(thing)
+def init():
+    print("[SYNC]: init")
+    buttons.register_on_state_change_callback(on_button_state_change_callback)
+    sensors.register_on_state_change_callback(on_sensor_state_change_callback)
+    power_counter.register_on_state_change_callback(on_sensor_state_change_callback)
+    mqtt.register_on_message_received_callback(on_mqtt_message_received_callback)
 
 
-def register_on_thing_sync_out(func):
-    print("[THING]: register_on_thing_sync_out")
-    global on_thing_sync_out
-    on_thing_sync_out = func
+async def handle_msg_reqs():
+    for t in things:
+        if t.dirty_out:
+            t.dirty_out = False
+            if t.cb_out is not None:
+                t.data = t.cb_out(t.data)
+            await mqtt.send_message(t.path, str(t.data))
+        if t.dirty_in:
+            t.dirty_in = False
+            if t.cb_in is not None:
+                t.data = t.cb_in(t.data)
 
 
-def register_on_thing_sync_in(func):
-    print("[THING]: register_on_thing_sync_in")
-    global on_thing_sync_in
-    on_thing_sync_in = func
-
-
-def register_thing_on_remote_in_cb(thing, cb):
-    print("[THING]: register_thing_on_remote_in_cb for %s" % (thing.hw))
-    thing.on_remote_in_cb = cb
-
-
-def register_on_remote_in_cb_using_hw(hw, cb):
-    t = get_thing_from_hw(hw)
-    if t is not None:
-        register_thing_on_remote_in_cb(t, cb)
+async def loop_async():
+    print("[SYNC]: loop async")
+    while True:
+        await handle_msg_reqs()
+        await asyncio.sleep(0)

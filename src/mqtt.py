@@ -17,8 +17,8 @@ async def conn_han(client):
 def on_mqtt_message_received(topic, msg, retained):
     topic = topic.decode()
     msg = msg.decode()
-    if lan.mac in topic:
-        topic = "/".join(topic.split("/")[1:])
+    if "%s/in" % (lan.mac) in topic:
+        topic = "/".join(topic.split("/")[2:])
     print("[MQTT]: received [%s] -> [%s]" % (topic, msg))
     if on_message_received_cb != None:
         on_message_received_cb(topic, msg)
@@ -64,7 +64,7 @@ def init():
     global SUBSCRIBE, PUBLISH_PREFIX
     lan.init()
     SUBSCRIBE = "%s/in/#" % (lan.mac)
-    PUBLISH_PREFIX = "%s" % (lan.mac)
+    PUBLISH_PREFIX = "%s/out" % (lan.mac)
     MQTTClient.DEBUG = True
     global client
     ip = read_ip_from_flash()
