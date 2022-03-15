@@ -9,11 +9,10 @@ class Thing:
         self.sync_in = sync_in
         self.sync_out = sync_out
         self.sync_out_force_update = False
+        self.on_remote_in_cb = None
 
 
 things = (
-    # debug
-    Thing("VERSION", out_path="out/version"),
     # inputs
     Thing("ONBOARD_BUTTON", out_path="out/test/button1"),
     Thing("B1_SW1", out_path="out/B4/SW1", sync_out=False),
@@ -74,11 +73,12 @@ things = (
     Thing("B4_LED1_R", in_path="in/B1/SW1/R", out_path="out/B1/SW1/R", sync_out=False),
     Thing("B4_LED2_GB", in_path="in/B1/SW2/GB", out_path="out/B1/SW2/GB", sync_out=False),
     Thing("B4_LED2_R", in_path="in/B1/SW2/R", out_path="out/B1/SW2/R", sync_out=False),
+    # logic
+    Thing("VERSION", in_path="in/version", out_path="out/version"),
 )
 
 on_thing_sync_out = None
 on_thing_sync_in = None
-on_thing_remote_in = None
 
 
 def get_thing_from_hw(hw):
@@ -106,6 +106,12 @@ def set_state(thing, state, soft=False, sync_out_force_update=False):
                 on_thing_sync_in(thing)
 
 
+def set_state_using_hw(hw, state, soft=False, sync_out_force_update=False):
+    t = get_thing_from_hw(hw)
+    if t is not None:
+        set_state(t, state, soft, sync_out_force_update)
+
+
 def set_in_remote_state(path, state):
     print("[THING]: set_in_remote_state path=%s, state=%s" % (path, state))
     thing = get_thing_from_path(path)
@@ -117,10 +123,13 @@ def set_in_remote_state(path, state):
 
 
 def sync_in_remote_state(thing):
-    if thing.in_remote_state != None and thing.in_remote_state != thing.state:
-        set_state(thing, thing.in_remote_state)
-        if on_thing_remote_in != None:
-            on_thing_remote_in(thing)
+    if thing.in_remote_state is not None and thing.in_remote_state != thing.state:
+        if thing.on_remote_in_cb is None:
+            set_state(thing, thing.in_remote_state)
+        else:
+            data = thing.in_remote_state
+            thing.in_remote_state = thing.state
+            thing.on_remote_in_cb(data)
 
 
 async def sync_out_remote_state(thing):
@@ -143,7 +152,12 @@ def register_on_thing_sync_in(func):
     on_thing_sync_in = func
 
 
-def register_on_thing_remote_in(func):
-    print("[THING]: register_on_thing_remote_in")
-    global on_thing_remote_in
-    on_thing_remote_in = func
+def register_thing_on_remote_in_cb(thing, cb):
+    print("[THING]: register_thing_on_remote_in_cb for %s" % (thing.hw))
+    thing.on_remote_in_cb = cb
+
+
+def register_on_remote_in_cb_using_hw(hw, cb):
+    t = get_thing_from_hw(hw)
+    if t is not None:
+        register_thing_on_remote_in_cb(t, cb)
