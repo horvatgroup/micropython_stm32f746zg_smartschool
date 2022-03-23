@@ -15,8 +15,8 @@ class Thing:
         self.data = None
         self.dirty_out = False
         self.dirty_in = False
-        self.cb_out = None
-        self.cb_in = None
+        self.cb_out = cb_out
+        self.cb_in = cb_in
 
 
 things = (
@@ -132,12 +132,12 @@ async def handle_msg_reqs():
         if t.dirty_out:
             t.dirty_out = False
             if t.cb_out is not None:
-                t.data = t.cb_out(t.data)
+                t.cb_out(t)
             await mqtt.send_message(t.path, str(t.data))
         if t.dirty_in:
             t.dirty_in = False
             if t.cb_in is not None:
-                t.data = t.cb_in(t.data)
+                t.cb_in(t)
 
 
 async def loop_async():
