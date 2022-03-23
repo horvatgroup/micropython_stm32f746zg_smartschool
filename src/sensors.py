@@ -273,6 +273,18 @@ async def realtime_sensors_action():
             await asyncio.sleep(0)
 
 
+def on_data_request(thing):
+    print("[SENSORS]: on_data_request[%s][%s]" % (thing.alias, thing.data))
+    for sensor in environment_sensors:
+        if thing.alias == sensor.get_name():
+            # TODO: add override or force method
+            if "ENV" in thing.alias:
+                for key in sensor.diff_timestamp:
+                    sensor.diff_timestamp[key] = 0
+            else:
+                sensor.diff_timeout = 0
+
+
 async def test_add_tasks():
     print("[SENSORS]: test_add_tasks")
     tasks = []
