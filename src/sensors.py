@@ -45,7 +45,7 @@ class Environment:
                 self.sensor = None
         return self.sensor
 
-    def action(self):
+    async def action(self):
         if self.get_sensor() is not None:
             try:
                 self.data = self.get_sensor().read()
@@ -66,9 +66,9 @@ class Light:
         self.timestamp = None
         self.timeout = 60 * 1000
 
-    def action(self):
+    async def action(self):
         try:
-            self.data = driver_bh1750fvi.sample(self.i2c)
+            self.data = await driver_bh1750fvi.sample(self.i2c)
             self.dirty = True
         except Exception as e:
             print("[SENSORS]: ERROR @ %s with %s" % (self.alias, e))
@@ -76,36 +76,35 @@ class Light:
 
 
 class Co2:
-    def __init__(self, uart, alias):
-        self.uart = uart
+    def __init__(self, uart_pin, alias):
+        self.uart_pin = uart_pin
+        self.uart = common.create_uart(self.uart_pin)
+        self.reinit_uart = False
         self.alias = alias
-        self.sensor = None
+        self.sensor = driver_mhz19b.MHZ19BSensor()
         self.data = None
+        self.dirty = False
+        self.error_msg = None
         self.timestamp = None
         self.timeout = 60 * 1000
 
-    def get_sensor(self):
-        if self.sensor is None:
-            try:
-                self.sensor = driver_mhz19b.MHZ19BSensor(self.uart)
-            except Exception as e:
-                print("[SENSORS]: ERROR @ %s get_sensor with %s" % (self.alias, e))
-                self.error_msg = e
-                self.sensor = None
-        return self.sensor
-
-    def action(self):
-        if self.get_sensor() is not None:
-            try:
-                data = self.get_sensor().measure()
-                if data is not None:
-                    self.dirty = True
-                else:
-                    self.error_msg = "received None"
-            except Exception as e:
-                print("[SENSORS]: ERROR @ %s read with %s" % (self.alias, e))
-                self.error_msg = e
-                self.sensor = None
+    async def action(self):
+        try:
+            if self.reinit_uart:
+                self.reinit_uart = False
+                self.uart.deinit()
+                self.uart.init(baudrate=9600)
+            self.data = await self.sensor.measure(self.uart)
+            if self.data is not None:
+                self.dirty = True
+            else:
+                print("[SENSORS]: ERROR @ %s received None" % (self.alias))
+                self.error_msg = "received None"
+                self.reinit_uart = True
+        except Exception as e:
+            print("[SENSORS]: ERROR @ %s read with %s" % (self.alias, e))
+            self.error_msg = e
+            self.reinit_uart = True
 
 
 def register_on_state_change_callback(cb):
@@ -118,18 +117,16 @@ def init():
     print("[SENSORS]: init")
     global environment_sensors, realtime_sensors
     s1_i2c = common.create_i2c(common_pins.S1_SCL_BUF_I2C_1.id, common_pins.S1_SDA_BUF_I2C_1.id)
-    s1_uart = common.create_uart(common_pins.S1_UART5.id)
     realtime_sensors.append(Radar(common_pins.S1_RADAR_SIG.id, alias="S1_RADAR"))
     environment_sensors.append(Environment(s1_i2c, alias="S1_ENV"))
     environment_sensors.append(Light(s1_i2c, alias="S1_LIGHT"))
-    environment_sensors.append(Co2(s1_uart, alias="S1_CO2"))
+    environment_sensors.append(Co2(common_pins.S1_UART5.id, alias="S1_CO2"))
 
     s2_i2c = common.create_i2c(common_pins.S2_SCL_BUF_I2C_2.id, common_pins.S2_SDA_BUF_I2C_2.id)
-    s2_uart = common.create_uart(common_pins.S2_UART2.id)
     realtime_sensors.append(Radar(common_pins.S2_RADAR_SIG.id, alias="S2_RADAR"))
     environment_sensors.append(Environment(s2_i2c, alias="S2_ENV"))
     environment_sensors.append(Light(s2_i2c, alias="S2_LIGHT"))
-    environment_sensors.append(Co2(s2_uart, alias="S2_CO2"))
+    environment_sensors.append(Co2(common_pins.S2_UART2.id, alias="S2_CO2"))
 
 
 async def environment_sensors_action():
@@ -138,8 +135,9 @@ async def environment_sensors_action():
         for sensor in environment_sensors:
             if sensor.timestamp is None or common.millis_passed(sensor.timestamp) >= sensor.timeout:
                 sensor.timestamp = common.get_millis()
-                sensor.action()
+                await sensor.action()
                 if sensor.dirty:
+                    sensor.dirty = False
                     if "_ENV" in sensor.alias:
                         for key in sensor.data:
                             if on_state_change_cb is not None:
@@ -147,10 +145,10 @@ async def environment_sensors_action():
                     else:
                         if on_state_change_cb is not None:
                             on_state_change_cb(sensor.alias, sensor.data)
-                    sensor.dirty = False
+
                 if sensor.error_msg is not None:
                     if on_state_change_cb is not None:
-                        on_state_change_cb("ERROR", '{"%s": "%s"}' % (sensor.alias, sensor.error_msg))
+                        on_state_change_cb(f"{sensor.alias}_ERROR", sensor.error_msg)
                     sensor.error_msg = None
             await asyncio.sleep_ms(0)
 
@@ -160,6 +158,10 @@ async def realtime_sensors_action():
     while True:
         for sensor in realtime_sensors:
             sensor.action()
+            if sensor.dirty:
+                sensor.dirty = False
+                if on_state_change_cb is not None:
+                    on_state_change_cb(sensor.alias, sensor.data)
         await asyncio.sleep_ms(0)
 
 
@@ -170,6 +172,15 @@ def on_data_request(thing):
             if thing.data == "request":
                 print(f"[SENSORS]: request {sensor.alias} data")
                 sensor.timestamp = None
+            elif "timeout" in thing.data:
+                try:
+                    sensor.timeout = int(thing.data.split(" ")[1])
+                except Exception as e:
+                    print("[SENSORS]: Error: timeout with %s" % (e))
+
+
+def test_print(alias, data):
+    print("[SENSORS]: CB -- alias[%s], data[%s]" % (alias, data))
 
 
 async def test_add_tasks():
@@ -179,10 +190,11 @@ async def test_add_tasks():
     tasks.append(asyncio.create_task(environment_sensors_action()))
     for task in tasks:
         await task
-        print("[RUNNER]: Error: loop task finished!")
+        print("[SENSORS]: Error: loop task finished!")
 
 
 def test_start():
-    print("[RUNNER]: test_start")
+    print("[SENSORS]: test_start")
     init()
+    register_on_state_change_callback(test_print)
     asyncio.run(test_add_tasks())

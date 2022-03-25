@@ -1,19 +1,18 @@
-import time
+import uasyncio as asyncio
+
 
 class MHZ19BSensor:
-    def __init__(self, uart):
-        self.uart = uart
 
     # measure CO2
-    def measure(self):
+    async def measure(self, uart):
         # send a read command to the sensor
-        self.uart.write(b'\xff\x01\x86\x00\x00\x00\x00\x00\x79')
+        uart.write(b'\xff\x01\x86\x00\x00\x00\x00\x00\x79')
 
         # a little delay to let the sensor measure CO2 and send the data back
-        # time.sleep(1)  # in seconds
+        await asyncio.sleep_ms(1000)
 
         # read and validate the data
-        buf = self.uart.read(9)
+        buf = uart.read(9)
         if self.is_valid(buf):
             co2 = buf[2] * 256 + buf[3]
 

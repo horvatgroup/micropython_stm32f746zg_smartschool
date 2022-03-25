@@ -4,6 +4,7 @@ import time
 import math
 from micropython import const
 from ubinascii import hexlify as hex
+
 try:
     import struct
 except ImportError:
@@ -139,7 +140,7 @@ class Adafruit_BME680:
         var2 = ((calc_pres / 4) * self._pressure_calibration[7]) / 8192
         var3 = (((calc_pres / 256) ** 3) * self._pressure_calibration[9]) / 131072
         calc_pres += ((var1 + var2 + var3 + (self._pressure_calibration[6] * 128)) / 16)
-        return calc_pres/100
+        return calc_pres / 100
 
     @property
     def humidity(self):
