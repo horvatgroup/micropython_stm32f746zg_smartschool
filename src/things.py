@@ -21,15 +21,25 @@ class Thing:
 
 things = (
     # sensors
-    Thing("S2/radar", alias="S1_RADAR"),
+    Thing("S2/radar", alias="S1_RADAR", cb_in=sensors.on_data_request),
     Thing("S2/env", alias="S1_ENV", cb_in=sensors.on_data_request),
+    Thing("S2/env/temperature", alias="S1_ENV_TEMPERATURE"),
+    Thing("S2/env/pressure", alias="S1_ENV_PRESSURE"),
+    Thing("S2/env/gas", alias="S1_ENV_GAS"),
+    Thing("S2/env/altitude", alias="S1_ENV_ALTITUDE"),
+    Thing("S2/env/humidity", alias="S1_ENV_HUMIDITY"),
     Thing("S2/light", alias="S1_LIGHT", cb_in=sensors.on_data_request),
     Thing("S2/co2", alias="S1_CO2", cb_in=sensors.on_data_request),
-    Thing("S1/radar", alias="S2_RADAR"),
+    Thing("S1/radar", alias="S2_RADAR", cb_in=sensors.on_data_request),
     Thing("S1/env", alias="S2_ENV", cb_in=sensors.on_data_request),
+    Thing("S1/env/temperature", alias="S2_ENV_TEMPERATURE"),
+    Thing("S1/env/pressure", alias="S2_ENV_PRESSURE"),
+    Thing("S1/env/gas", alias="S2_ENV_GAS"),
+    Thing("S1/env/altitude", alias="S2_ENV_ALTITUDE"),
+    Thing("S1/env/humidity", alias="S2_ENV_HUMIDITY"),
     Thing("S1/light", alias="S2_LIGHT", cb_in=sensors.on_data_request),
     Thing("S1/co2", alias="S2_CO2", cb_in=sensors.on_data_request),
-    Thing("power_counter", alias="POWER_COUNTER"),
+    Thing("power_counter", alias="POWER_COUNTER", cb_in=sensors.on_data_request),
     # outputs
     Thing("test/led1"),
     Thing("test/led2"),
@@ -64,6 +74,7 @@ things = (
     Thing("B1/SW2/R"),
     # logic
     Thing("version", cb_in=version.req_version),
+    Thing("error", alias="ERROR"),
 )
 
 
@@ -90,12 +101,12 @@ def send_msg_req(t, data):
     t.data = data
 
 
-def on_button_state_change_callback(hw, state):
+def on_button_state_change_callback(alias, data):
     pass
 
 
-def on_sensor_state_change_callback(hw, data):
-    t = get_thing_from_alias(hw)
+def on_sensor_state_change_callback(alias, data):
+    t = get_thing_from_alias(alias)
     if t is not None:
         send_msg_req(t, data)
 
