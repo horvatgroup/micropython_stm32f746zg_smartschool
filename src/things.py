@@ -1,9 +1,9 @@
 import uasyncio as asyncio
-import buttons
 import sensors
 import power_counter
 import mqtt
 import version
+import phy_interface
 
 
 class Thing:
@@ -46,7 +46,7 @@ things = (
     Thing("S1/co2", alias="S2_CO2", cb_in=sensors.on_data_request),
     Thing("S1/co2/error", alias="S2_CO2_ERROR", cb_in=sensors.on_data_request),
     Thing("power_counter", alias="POWER_COUNTER", cb_in=sensors.on_data_request),
-    # outputs
+    # phy outputs
     Thing("test/led1"),
     Thing("test/led2"),
     Thing("test/led3"),
@@ -80,6 +80,11 @@ things = (
     Thing("B1/SW2/R"),
     # logic
     Thing("version", cb_in=version.req_version),
+    Thing("lights/1/1", cb_in=phy_interface.on_data_received),
+    Thing("lights/1/2", cb_in=phy_interface.on_data_received),
+    Thing("lights/2/1", cb_in=phy_interface.on_data_received),
+    Thing("rollo/1", cb_in=phy_interface.on_data_received),
+    Thing("rollo/2", cb_in=phy_interface.on_data_received),
 )
 
 
@@ -106,10 +111,6 @@ def send_msg_req(t, data):
     t.data = data
 
 
-def on_button_state_change_callback(alias, data):
-    pass
-
-
 def on_sensor_state_change_callback(alias, data):
     t = get_thing_from_alias(alias)
     if t is not None:
@@ -128,8 +129,7 @@ def on_mqtt_message_received_callback(path, msg):
 
 
 def init():
-    print("[SYNC]: init")
-    buttons.register_on_state_change_callback(on_button_state_change_callback)
+    print("[THINGS]: init")
     sensors.register_on_state_change_callback(on_sensor_state_change_callback)
     power_counter.register_on_state_change_callback(on_sensor_state_change_callback)
     mqtt.register_on_message_received_callback(on_mqtt_message_received_callback)

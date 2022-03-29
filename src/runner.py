@@ -7,7 +7,7 @@ import sensors
 import mqtt
 import cli
 import signal_leds
-# import lighting
+import phy_interface
 import power_counter
 
 
@@ -28,7 +28,9 @@ async def process_time_measure(timeout=20):
 def init():
     print("[RUNNER]: init")
     buttons.init()
+    buttons.action()
     leds.init()
+    phy_interface.init()
     sensors.init()
     power_counter.init()
     mqtt.init()
