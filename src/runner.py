@@ -50,7 +50,7 @@ async def add_tasks():
     tasks.append(asyncio.create_task(mqtt.loop_async()))
     tasks.append(asyncio.create_task(common.loop_async("CLI", cli.action)))
     tasks.append(asyncio.create_task(signal_leds.action()))
-    # tasks.append(asyncio.create_task(lighting.action()))
+    tasks.append(asyncio.create_task(phy_interface.action()))
     tasks.append(asyncio.create_task(process_time_measure()))
     for task in tasks:
         await task

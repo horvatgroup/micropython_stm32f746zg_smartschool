@@ -85,6 +85,8 @@ things = (
     Thing("lights/2/1", cb_in=phy_interface.on_data_received),
     Thing("rollo/1", cb_in=phy_interface.on_data_received),
     Thing("rollo/2", cb_in=phy_interface.on_data_received),
+    Thing("co2_alarm/1", cb_in=phy_interface.on_data_received),
+    Thing("co2_alarm/2", cb_in=phy_interface.on_data_received),
 )
 
 
