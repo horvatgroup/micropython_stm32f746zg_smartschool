@@ -162,6 +162,7 @@ def set_rollos(rollo, data):
                 rollo.current_position = rollo.current_position - int(common.millis_passed(rollo.timestamp) / rollo.max_timeout * 100)
                 if rollo.current_position < 0:
                     rollo.current_position = 0
+        print("[PHY]: rollo[%s], position[%d]" % (rollo.path, rollo.current_position))
         rollo.up.active = False
         leds.set_state_by_name(rollo.down.relay, 0)
         rollo.down.active = False
