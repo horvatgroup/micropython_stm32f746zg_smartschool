@@ -43,6 +43,8 @@ class Co2Alarm:
         self.active = False
 
 
+on_state_change_cb = None
+
 lights = {
     "lights/1/1": Light("lights/1/1", "B4_SW1", "RELAY_11", "B4_LED1_GB", "B4_LED1_R"),
     "lights/1/2": Light("lights/1/2", "B4_SW2", "RELAY_12", "B4_LED2_GB", "B4_LED2_R"),
@@ -153,22 +155,30 @@ def set_rollos(rollo, data):
         leds.set_state_by_name(rollo.down.pressed_light, 0)
         leds.set_state_by_name(rollo.down.idle_light, 1)
         leds.set_state_by_name(rollo.up.relay, 0)
-        if rollo.current_position is not None:
-            if rollo.up.active:
-                rollo.current_position = rollo.current_position + int(common.millis_passed(rollo.timestamp) / rollo.max_timeout * 100)
-                if rollo.current_position > 100:
-                    rollo.current_position = 100
-            elif rollo.down.active:
-                rollo.current_position = rollo.current_position - int(common.millis_passed(rollo.timestamp) / rollo.max_timeout * 100)
-                if rollo.current_position < 0:
-                    rollo.current_position = 0
-        print("[PHY]: rollo[%s], position[%d]" % (rollo.path, rollo.current_position))
+        if rollo.up.active:
+            if common.millis_passed(rollo.timestamp) >= rollo.max_timeout:
+                rollo.current_position = 100
+            else:
+                if rollo.current_position is not None:
+                    rollo.current_position = rollo.current_position + int(common.millis_passed(rollo.timestamp) / rollo.max_timeout * 100)
+                    if rollo.current_position > 100:
+                        rollo.current_position = 100
+        elif rollo.down.active:
+            if common.millis_passed(rollo.timestamp) >= rollo.max_timeout:
+                rollo.current_position = 0
+            else:
+                if rollo.current_position is not None:
+                    rollo.current_position = rollo.current_position - int(common.millis_passed(rollo.timestamp) / rollo.max_timeout * 100)
+                    if rollo.current_position < 0:
+                        rollo.current_position = 0
+        print("[PHY]: rollo[%s], position[%s]" % (rollo.path, str(rollo.current_position)))
+        if on_state_change_cb is not None:
+            on_state_change_cb(rollo.path, str(rollo.current_position))
         rollo.up.active = False
         leds.set_state_by_name(rollo.down.relay, 0)
         rollo.down.active = False
         rollo.timeout = None
         rollo.timestamp = None
-        rollo.first_time_position = None
     else:
         percent = get_percent_from_data(data)
         if percent is not None:
@@ -183,12 +193,12 @@ def set_rollos(rollo, data):
                 timeout = rollo.max_timeout
             else:
                 if rollo.current_position is not None:
-                    if percent > rollo.current_position:
+                    move_percent = percent - rollo.current_position
+                    timeout = abs(int(move_percent / 100 * rollo.max_timeout))
+                    if move_percent > 0:
                         direction_up = True
-                        timeout = int(1 / percent * rollo.max_timeout)
-                    elif percent < rollo.current_position:
+                    elif move_percent < 0:
                         direction_down = True
-                        timeout = int(1 / percent * rollo.max_timeout)
                 else:
                     rollo.first_time_position = percent
                     direction_up = True
@@ -221,13 +231,19 @@ def check_rollos_timeout():
         rollo = rollos[key]
         if rollo.up.active or rollo.down.active:
             if common.millis_passed(rollo.timestamp) >= rollo.timeout:
+                set_rollos(rollo, "STOP")
                 if rollo.first_time_position is not None:
-                    percent = rollo.first_time_position
-                    rollo.first_time_position = None
-                    rollo.current_position = 100
-                    set_rollos(rollo, percent)
-                else:
-                    set_rollos(rollo, "STOP")
+                    if rollo.current_position is None:
+                        rollo.first_time_position = None
+                    else:
+                        set_rollos(rollo, rollo.first_time_position)
+                        rollo.first_time_position = None
+
+
+def register_on_state_change_callback(cb):
+    global on_state_change_cb
+    print("[PHY]: register on state change cb")
+    on_state_change_cb = cb
 
 
 def init():
@@ -242,4 +258,4 @@ def init():
 async def action():
     while True:
         check_rollos_timeout()
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.1)

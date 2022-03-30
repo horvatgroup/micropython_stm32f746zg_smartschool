@@ -117,6 +117,9 @@ def on_sensor_state_change_callback(alias, data):
     t = get_thing_from_alias(alias)
     if t is not None:
         send_msg_req(t, data)
+    t = get_thing_from_path(alias)
+    if t is not None:
+        send_msg_req(t, data)
 
 
 def on_mqtt_message_received_callback(path, msg):
@@ -134,6 +137,7 @@ def init():
     print("[THINGS]: init")
     sensors.register_on_state_change_callback(on_sensor_state_change_callback)
     power_counter.register_on_state_change_callback(on_sensor_state_change_callback)
+    phy_interface.register_on_state_change_callback(on_sensor_state_change_callback)
     mqtt.register_on_message_received_callback(on_mqtt_message_received_callback)
 
 
