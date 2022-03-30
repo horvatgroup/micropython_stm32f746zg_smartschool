@@ -29,7 +29,7 @@ class Rollo:
         self.up = rollo_up
         self.down = rollo_down
         self.timestamp = None
-        self.max_timeout = 10000
+        self.max_timeout = 60000
         self.timeout = self.max_timeout
         self.current_position = None
         self.first_time_position = None
