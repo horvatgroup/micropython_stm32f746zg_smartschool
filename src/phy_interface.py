@@ -46,9 +46,9 @@ class Co2Alarm:
 on_state_change_cb = None
 
 lights = {
-    "lights/1/1": Light("lights/1/1", "B4_SW1", "RELAY_11", "B4_LED1_GB", "B4_LED1_R"),
-    "lights/1/2": Light("lights/1/2", "B4_SW2", "RELAY_12", "B4_LED2_GB", "B4_LED2_R"),
-    "lights/2/1": Light("lights/2/1", "B3_SW1", "RELAY_6", "B3_LED1_GB", "B3_LED1_R")
+    "lights/1/1": Light("lights/1/1", "B4_SW1", "RELAY_11", "B4_LED1_R", "B4_LED1_GB"),
+    "lights/1/2": Light("lights/1/2", "B4_SW2", "RELAY_12", "B4_LED2_R", "B4_LED2_GB"),
+    "lights/2/1": Light("lights/2/1", "B3_SW1", "RELAY_6", "B3_LED1_R", "B3_LED1_GB")
 }
 
 rollos = {
