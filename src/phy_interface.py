@@ -129,6 +129,8 @@ def set_lights(light, data):
         light.state = state
         leds.set_state_by_name(light.main_light, state)
         leds.set_state_by_name(light.activity_light, int(not (state)))
+        if on_state_change_cb is not None:
+            on_state_change_cb(light.path, light.state)
 
 
 def get_percent_from_data(data):
