@@ -1,4 +1,4 @@
-VERSION = 1.2
+VERSION = 2.0
 
 
 def req_version(thing):

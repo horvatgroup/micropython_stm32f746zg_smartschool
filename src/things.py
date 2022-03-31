@@ -5,6 +5,7 @@ import mqtt
 import version
 import phy_interface
 import leds
+import signal_leds
 
 
 class Thing:
@@ -129,6 +130,7 @@ def on_sensor_state_change_callback(alias, data):
 
 
 def on_mqtt_message_received_callback(path, msg):
+    signal_leds.set_activity()
     t = get_thing_from_path(path)
     if t is not None:
         if t.ignore_duplicates_in:
@@ -153,6 +155,7 @@ async def handle_msg_reqs():
             t.dirty_out = False
             if t.cb_out is not None:
                 t.cb_out(t)
+            signal_leds.set_activity()
             await mqtt.send_message(t.path, str(t.data))
         if t.dirty_in:
             t.dirty_in = False
