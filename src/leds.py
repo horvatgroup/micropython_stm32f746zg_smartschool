@@ -18,7 +18,11 @@ relay_pins = [
     common_pins.RELAY_9,
     common_pins.RELAY_10,
     common_pins.RELAY_11,
-    common_pins.RELAY_12
+    common_pins.RELAY_12,
+    common_pins.RELAY_13,
+    common_pins.RELAY_14,
+    common_pins.RELAY_15,
+    common_pins.RELAY_16
 ]
 led_pins = [
     common_pins.ONBOARD_LED1,
