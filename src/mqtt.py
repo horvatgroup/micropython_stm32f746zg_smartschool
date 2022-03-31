@@ -58,7 +58,7 @@ def register_on_message_received_callback(cb):
 def write_credentials_to_flash(server, username='', password=''):
     print("[MQTT]: write credentials server[%s], username[%s], password[%s]" % (server, username, password))
     f = open(CREDENTIALS_FILENAME, 'w')
-    content = f"server='{server}'\nusername='{username}'\npassword='{password}'\n"
+    content = f"server = '{server}'\nusername = '{username}'\npassword = '{password}'\n"
     f.write(content)
     f.close()
 
