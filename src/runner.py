@@ -9,6 +9,7 @@ import cli
 import signal_leds
 import phy_interface
 import power_counter
+import heartbeat
 
 
 async def process_time_measure(timeout=20):
@@ -52,6 +53,7 @@ async def add_tasks():
     tasks.append(asyncio.create_task(signal_leds.action()))
     tasks.append(asyncio.create_task(phy_interface.action()))
     tasks.append(asyncio.create_task(process_time_measure()))
+    tasks.append(asyncio.create_task(heartbeat.action()))
     for task in tasks:
         await task
     print("[RUNNER]: Error: loop task finished!")
