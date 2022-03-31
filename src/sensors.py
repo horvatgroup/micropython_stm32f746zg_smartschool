@@ -33,7 +33,7 @@ class Environment:
         self.dirty = False
         self.error_msg = None
         self.timestamp = None
-        self.timeout = 30 * 60 * 1000
+        self.timeout = 60 * 1000
 
     def get_sensor(self):
         if self.sensor is None:
@@ -64,7 +64,7 @@ class Light:
         self.dirty = False
         self.error_msg = None
         self.timestamp = None
-        self.timeout = 30 * 60 * 1000
+        self.timeout = 60 * 1000
 
     async def action(self):
         try:
@@ -86,7 +86,7 @@ class Co2:
         self.dirty = False
         self.error_msg = None
         self.timestamp = None
-        self.timeout = 30 * 60 * 1000
+        self.timeout = 60 * 1000
 
     async def action(self):
         try:
