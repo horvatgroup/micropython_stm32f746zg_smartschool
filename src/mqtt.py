@@ -2,12 +2,31 @@ import uasyncio as asyncio
 import lan
 from lib_mqtt_as import MQTTClient
 
-DEFAULT_SERVER = '10.200.60.60'
-MQTT_IP_FILENAME = "mqtt_ip.txt"
 SUBSCRIBE = None
 PUBLISH_PREFIX = None
 client = None
 on_message_received_cb = None
+
+CREDENTIALS_FILENAME = "credentials.py"
+
+username = None
+password = None
+server = None
+
+
+def check_credentials():
+    global username, password, server
+    try:
+        import credentials
+        print("[MQTT]: credentials found")
+        username = credentials.username
+        password = credentials.password
+        server = credentials.server
+    except:
+        print("[MQTT]: credentials not found, using default")
+        username = ''
+        password = ''
+        server = '10.200.60.60'
 
 
 async def conn_han(client):
@@ -36,23 +55,12 @@ def register_on_message_received_callback(cb):
     on_message_received_cb = cb
 
 
-def write_ip_to_flash(ip):
-    print("[MQTT]: ip write to file %s" % (ip))
-    f = open(MQTT_IP_FILENAME, 'w')
-    f.write(ip)
+def write_credentials_to_flash(server, username='', password=''):
+    print("[MQTT]: write credentials server[%s], username[%s], password[%s]" % (server, username, password))
+    f = open(CREDENTIALS_FILENAME, 'w')
+    content = f"server='{server}'\nusername='{username}'\npassword='{password}'\n"
+    f.write(content)
     f.close()
-
-
-def read_ip_from_flash():
-    try:
-        f = open(MQTT_IP_FILENAME)
-        ip = f.read()
-        f.close()
-        print("[MQTT]: ip read from file %s" % (ip))
-        return ip
-    except:
-        print("[MQTT]: no ip found using default %s" % (DEFAULT_SERVER))
-        return None
 
 
 def is_connected():
@@ -66,11 +74,9 @@ def init():
     SUBSCRIBE = "%s/in/#" % (lan.mac)
     PUBLISH_PREFIX = "%s/out" % (lan.mac)
     MQTTClient.DEBUG = True
+    check_credentials()
     global client
-    ip = read_ip_from_flash()
-    if not ip:
-        ip = DEFAULT_SERVER
-    client = MQTTClient(client_id=lan.mac, subs_cb=on_mqtt_message_received, connect_coro=conn_han, server=ip)
+    client = MQTTClient(client_id=lan.mac, subs_cb=on_mqtt_message_received, connect_coro=conn_han, server=server, user=username, password=password)
 
 
 async def loop_async():
@@ -79,7 +85,7 @@ async def loop_async():
         try:
             print("[MQTT]: connect to LAN")
             while True:
-                if lan.check_link() == True:
+                if await lan.check_link() == True:
                     break
                 await asyncio.sleep(1)
 

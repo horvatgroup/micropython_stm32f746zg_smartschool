@@ -125,15 +125,17 @@ def parse_lan(cmd):
 
 
 def parse_mqtt(cmd):
-    if cmd[1] == "ip":
-        if cmd[2] == "set":
-            mqtt.write_ip_to_flash(cmd[3])
-        elif cmd[2] == "get":
-            ip_flash = mqtt.read_ip_from_flash()
-            print("flash ip", ip_flash)
-            print("current ip", mqtt.client.server)
-        else:
-            print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
+    if cmd[1] == "set":
+        if len(cmd) == 3:
+            mqtt.write_credentials_to_flash(cmd[2])
+        elif len(cmd) == 5:
+            mqtt.write_credentials_to_flash(cmd[2], cmd[3], cmd[4])
+    elif cmd[1] == "get":
+        try:
+            import credentials
+            print("[CLI]: credentials server[%s], username[%s], password[%s]" % (credentials.server, credentials.username, credentials.password))
+        except:
+            print("[CLI]: credentials not found")
     else:
         print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
 
