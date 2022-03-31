@@ -23,24 +23,23 @@ class RolloSingleDirection:
         self.active = False
 
 
+class Co2Alarm:
+    def __init__(self, path):
+        self.path = path
+        self.active = False
+
+
 class Rollo:
-    def __init__(self, path, rollo_up, rollo_down):
+    def __init__(self, path, rollo_up, rollo_down, co2alarm):
         self.path = path
         self.up = rollo_up
         self.down = rollo_down
+        self.alarm = co2alarm
         self.timestamp = None
         self.max_timeout = 60000
         self.timeout = self.max_timeout
         self.current_position = None
         self.first_time_position = None
-
-
-class Co2Alarm:
-    def __init__(self, path, light1, light2):
-        self.path = path
-        self.light1 = light1
-        self.light2 = light2
-        self.active = False
 
 
 on_state_change_cb = None
@@ -52,13 +51,8 @@ lights = {
 }
 
 rollos = {
-    "rollo/1": Rollo("rollo/1", RolloSingleDirection("RELAY_4", "B2_SW1", "B2_LED1_GB", "B2_LED1_R"), RolloSingleDirection("RELAY_3", "B2_SW2", "B2_LED2_GB", "B2_LED2_R")),
-    "rollo/2": Rollo("rollo/2", RolloSingleDirection("RELAY_2", "B1_SW1", "B1_LED1_GB", "B1_LED1_R"), RolloSingleDirection("RELAY_1", "B1_SW2", "B1_LED2_GB", "B1_LED2_R"))
-}
-
-co2alarm = {
-    "co2_alarm/1": Co2Alarm("co2_alarm/1", "B2_LED1_R", "B2_LED2_R"),
-    "co2_alarm/2": Co2Alarm("co2_alarm/2", "B1_LED1_R", "B1_LED2_R")
+    "rollo/1": Rollo("rollo/1", RolloSingleDirection("RELAY_4", "B2_SW1", "B2_LED1_GB", "B2_LED1_R"), RolloSingleDirection("RELAY_3", "B2_SW2", "B2_LED2_GB", "B2_LED2_R"), Co2Alarm("co2_alarm/1")),
+    "rollo/2": Rollo("rollo/2", RolloSingleDirection("RELAY_2", "B1_SW1", "B1_LED1_GB", "B1_LED1_R"), RolloSingleDirection("RELAY_1", "B1_SW2", "B1_LED2_GB", "B1_LED2_R"), Co2Alarm("co2_alarm/2"))
 }
 
 
@@ -93,12 +87,13 @@ def check_rollos_for_button(alias, state):
     rollo = get_rollo_from_alias(alias)
     if rollo is not None:
         if state:
-            if rollo.up.button == alias:
-                leds.set_state_by_name(rollo.up.idle_light, 0)
-                leds.set_state_by_name(rollo.up.pressed_light, 1)
-            elif rollo.down.button == alias:
-                leds.set_state_by_name(rollo.down.idle_light, 0)
-                leds.set_state_by_name(rollo.down.pressed_light, 1)
+            if rollo.alarm.active == False:
+                if rollo.up.button == alias:
+                    leds.set_state_by_name(rollo.up.idle_light, 0)
+                    leds.set_state_by_name(rollo.up.pressed_light, 1)
+                elif rollo.down.button == alias:
+                    leds.set_state_by_name(rollo.down.idle_light, 0)
+                    leds.set_state_by_name(rollo.down.pressed_light, 1)
         else:
             if rollo.up.active or rollo.down.active:
                 set_rollos(rollo, "STOP")
@@ -121,6 +116,10 @@ def on_data_received(thing):
     rollo = rollos.get(thing.path)
     if rollo is not None:
         set_rollos(rollo, thing.data)
+    for key in rollos:
+        rollo = rollos[key]
+        if rollo.alarm.path == thing.path:
+            set_co2allarms(rollo, thing.data)
 
 
 def set_lights(light, data):
@@ -150,10 +149,11 @@ def get_percent_from_data(data):
 def set_rollos(rollo, data):
     print("[PHY]: set_rollos[%s], data[%s]" % (rollo.path, data))
     if data == "STOP":
-        leds.set_state_by_name(rollo.up.pressed_light, 0)
-        leds.set_state_by_name(rollo.up.idle_light, 1)
-        leds.set_state_by_name(rollo.down.pressed_light, 0)
-        leds.set_state_by_name(rollo.down.idle_light, 1)
+        if rollo.alarm.active == False:
+            leds.set_state_by_name(rollo.up.pressed_light, 0)
+            leds.set_state_by_name(rollo.up.idle_light, 1)
+            leds.set_state_by_name(rollo.down.pressed_light, 0)
+            leds.set_state_by_name(rollo.down.idle_light, 1)
         leds.set_state_by_name(rollo.up.relay, 0)
         if rollo.up.active:
             if common.millis_passed(rollo.timestamp) >= rollo.max_timeout:
@@ -205,8 +205,9 @@ def set_rollos(rollo, data):
                     timeout = rollo.max_timeout
 
             if direction_up:
-                leds.set_state_by_name(rollo.up.pressed_light, 0)
-                leds.set_state_by_name(rollo.up.idle_light, 1)
+                if rollo.alarm.active == False:
+                    leds.set_state_by_name(rollo.up.pressed_light, 0)
+                    leds.set_state_by_name(rollo.up.idle_light, 1)
                 if rollo.down.active:
                     leds.set_state_by_name(rollo.down.relay, 0)
                     rollo.down.active = False
@@ -215,8 +216,9 @@ def set_rollos(rollo, data):
                 rollo.timeout = timeout
                 rollo.timestamp = common.get_millis()
             elif direction_down:
-                leds.set_state_by_name(rollo.down.pressed_light, 0)
-                leds.set_state_by_name(rollo.down.idle_light, 1)
+                if rollo.alarm.active == False:
+                    leds.set_state_by_name(rollo.down.pressed_light, 0)
+                    leds.set_state_by_name(rollo.down.idle_light, 1)
                 if rollo.up.active:
                     leds.set_state_by_name(rollo.up.relay, 0)
                     rollo.up.active = False
@@ -238,6 +240,23 @@ def check_rollos_timeout():
                     else:
                         set_rollos(rollo, rollo.first_time_position)
                         rollo.first_time_position = None
+
+
+def set_co2allarms(rollo, data):
+    print("[PHY]: set_co2allarms[%s], data[%s]" % (rollo.alarm.path, data))
+    state = int(data) if data in ("0", "1", 0, 1) else None
+    if state is not None:
+        rollo.alarm.active = state
+        if rollo.alarm.active:
+            leds.set_state_by_name(rollo.up.pressed_light, 1)
+            leds.set_state_by_name(rollo.up.idle_light, 0)
+            leds.set_state_by_name(rollo.down.pressed_light, 1)
+            leds.set_state_by_name(rollo.down.idle_light, 0)
+        else:
+            leds.set_state_by_name(rollo.up.pressed_light, 0)
+            leds.set_state_by_name(rollo.up.idle_light, 1)
+            leds.set_state_by_name(rollo.down.pressed_light, 0)
+            leds.set_state_by_name(rollo.down.idle_light, 1)
 
 
 def register_on_state_change_callback(cb):
