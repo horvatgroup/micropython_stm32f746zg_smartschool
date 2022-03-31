@@ -73,6 +73,12 @@ def set_state_by_name(name, state):
             led.set_state(state)
 
 
+def set_relay_direct(thing):
+    state = int(thing.data) if thing.data in ("0", "1", 0, 1) else None
+    if state is not None:
+        set_state_by_name(thing.alias, state)
+
+
 def test_relays():
     global relays
     relays = []

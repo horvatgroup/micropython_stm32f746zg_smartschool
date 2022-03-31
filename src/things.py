@@ -4,6 +4,7 @@ import power_counter
 import mqtt
 import version
 import phy_interface
+import leds
 
 
 class Thing:
@@ -50,18 +51,18 @@ things = (
     Thing("test/led1"),
     Thing("test/led2"),
     Thing("test/led3"),
-    Thing("R/relay8"),
-    Thing("R/relay7"),
-    Thing("R/relay6"),
-    Thing("R/relay5"),
-    Thing("R/relay4"),
-    Thing("R/relay3"),
-    Thing("R/relay2"),
-    Thing("R/relay1"),
-    Thing("R/relay9"),
-    Thing("R/relay10"),
-    Thing("R/relay11"),
-    Thing("R/relay12"),
+    Thing("R/relay8", alias="RELAY_1", cb_in=leds.set_relay_direct),
+    Thing("R/relay7", alias="RELAY_2", cb_in=leds.set_relay_direct),
+    Thing("R/relay6", alias="RELAY_3", cb_in=leds.set_relay_direct),
+    Thing("R/relay5", alias="RELAY_4", cb_in=leds.set_relay_direct),
+    Thing("R/relay4", alias="RELAY_5", cb_in=leds.set_relay_direct),
+    Thing("R/relay3", alias="RELAY_6", cb_in=leds.set_relay_direct),
+    Thing("R/relay2", alias="RELAY_7", cb_in=leds.set_relay_direct),
+    Thing("R/relay1", alias="RELAY_8", cb_in=leds.set_relay_direct),
+    Thing("R/relay9", alias="RELAY_9", cb_in=leds.set_relay_direct),
+    Thing("R/relay10", alias="RELAY_10", cb_in=leds.set_relay_direct),
+    Thing("R/relay11", alias="RELAY_11", cb_in=leds.set_relay_direct),
+    Thing("R/relay12", alias="RELAY_12", cb_in=leds.set_relay_direct),
     Thing("B4/SW1/GB"),
     Thing("B4/SW1/R"),
     Thing("B4/SW2/GB"),
