@@ -47,6 +47,7 @@ class Led:
     def __init__(self, id, name, active_high=False):
         self.output = common.create_output(id)
         self.active_high = active_high
+        self.state = None
         self.set_state(0)
         self.name = name
 
@@ -61,6 +62,7 @@ class Led:
                 self.output.on()
             else:
                 self.output.off()
+        self.state = state
 
 
 def set_state_by_name(name, state):
@@ -73,10 +75,26 @@ def set_state_by_name(name, state):
             led.set_state(state)
 
 
-def set_relay_direct(thing):
+def get_state_by_name(name):
+    for relay in relays:
+        if relay.name == name:
+            return relay.state
+    for led in leds:
+        if led.name == name:
+            return led.state
+    return None
+
+
+def on_relay_direct(thing):
     state = int(thing.data) if thing.data in ("0", "1", 0, 1) else None
     if state is not None:
         set_state_by_name(thing.alias, state)
+    if thing.data == "request":
+        state = get_state_by_name(thing.alias)
+        print(thing.alias, thing.data)
+        if state is not None:
+            thing.data = state
+            thing.dirty_out = True
 
 
 def test_relays():
