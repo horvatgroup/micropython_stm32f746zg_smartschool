@@ -123,6 +123,9 @@ def send_msg_req(t, data):
 def on_sensor_state_change_callback(alias, data):
     t = get_thing_from_alias(alias)
     if t is not None:
+        if t.alias == "POWER_COUNTER":
+            if t.dirty_out == True:
+                t.data += data
         send_msg_req(t, data)
     t = get_thing_from_path(alias)
     if t is not None:

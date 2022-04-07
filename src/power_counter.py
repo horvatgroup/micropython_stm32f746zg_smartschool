@@ -6,9 +6,8 @@ impulses = 0
 sent_impulses = 0
 IMPULSES_PER_KWH = 500
 on_state_change_cb = None
-diff_value = 2.2
-diff_timeout = 30 * 60000
-diff_timestamp = 0
+timeout = 15 * 60000
+timestamp = None
 
 
 def on_interrupt(pin):
@@ -31,11 +30,11 @@ def register_on_state_change_callback(cb):
 
 
 def action():
-    global diff_timestamp, sent_impulses
-    if diff_timestamp == 0 or (impulses / IMPULSES_PER_KWH) >= diff_value or common.millis_passed(diff_timestamp) >= diff_timeout:
+    global timestamp, sent_impulses
+    if timestamp is None or common.millis_passed(timestamp) >= timeout:
         sent_impulses = impulses
         value = sent_impulses / IMPULSES_PER_KWH
-        diff_timestamp = common.get_millis()
+        timestamp = common.get_millis()
         print("[POWER_COUNTER]: %f kwh" % (value))
         if on_state_change_cb != None:
             on_state_change_cb("POWER_COUNTER", value)
@@ -44,4 +43,4 @@ def action():
 def test():
     init()
     while True:
-        loop()
+        action()
