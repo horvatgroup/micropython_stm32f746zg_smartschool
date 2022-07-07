@@ -22,6 +22,16 @@ class Thing:
 
 
 things = (
+    # inputs
+    Thing("out/test/button1", alias="ONBOARD_BUTTON"),
+    Thing("B4/SW1", alias="B1_SW1"),
+    Thing("B4/SW2", alias="B1_SW2"),
+    Thing("B3/SW1", alias="B2_SW1"),
+    Thing("B3/SW2", alias="B2_SW2"),
+    Thing("B2/SW1", alias="B3_SW1"),
+    Thing("B2/SW2", alias="B3_SW2"),
+    Thing("B1/SW1", alias="B4_SW1"),
+    Thing("B1/SW2", alias="B4_SW2"),
     # sensors
     Thing("S2/radar", alias="S1_RADAR", cb_in=sensors.on_data_request),
     Thing("S2/env", alias="S1_ENV", cb_in=sensors.on_data_request),
@@ -86,13 +96,13 @@ things = (
     Thing("B1/SW2/R"),
     # logic
     Thing("version", cb_in=version.req_version),
-    Thing("lights/1/1", cb_in=phy_interface.on_data_received),
-    Thing("lights/1/2", cb_in=phy_interface.on_data_received),
-    Thing("lights/2/1", cb_in=phy_interface.on_data_received),
-    Thing("rollo/1", cb_in=phy_interface.on_data_received),
-    Thing("rollo/2", cb_in=phy_interface.on_data_received),
-    Thing("co2_alarm/1", cb_in=phy_interface.on_data_received),
-    Thing("co2_alarm/2", cb_in=phy_interface.on_data_received),
+    #Thing("lights/1/1", cb_in=phy_interface.on_data_received),
+    #Thing("lights/1/2", cb_in=phy_interface.on_data_received),
+    #Thing("lights/2/1", cb_in=phy_interface.on_data_received),
+    #Thing("rollo/1", cb_in=phy_interface.on_data_received),
+    #Thing("rollo/2", cb_in=phy_interface.on_data_received),
+    #Thing("co2_alarm/1", cb_in=phy_interface.on_data_received),
+    #Thing("co2_alarm/2", cb_in=phy_interface.on_data_received),
     Thing("heartbeat"),
 )
 
