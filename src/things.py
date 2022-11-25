@@ -6,6 +6,7 @@ import version
 import phy_interface
 import leds
 import signal_leds
+import system_utils
 
 
 class Thing:
@@ -96,6 +97,7 @@ things = (
     Thing("B1/SW2/R"),
     # logic
     Thing("version", cb_in=version.req_version),
+    Thing("reset", cb_in=system_utils.req_reset),
     #Thing("lights/1/1", cb_in=phy_interface.on_data_received),
     #Thing("lights/1/2", cb_in=phy_interface.on_data_received),
     #Thing("lights/2/1", cb_in=phy_interface.on_data_received),
