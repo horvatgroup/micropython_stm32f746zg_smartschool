@@ -2,9 +2,22 @@ from machine import Pin, SoftI2C, UART
 from time import ticks_ms, sleep
 import uasyncio as asyncio
 
+last_millis = 0
+millis_overflow_counter = 0
+millis_overflow_value = 2 ** 30 - 1
+
+
+def get_real_millis():
+    return ticks_ms()
+
 
 def get_millis():
-    return ticks_ms()
+    global last_millis, millis_overflow_counter
+    millis = get_real_millis()
+    if millis < last_millis:
+        millis_overflow_counter += 1
+    last_millis = millis
+    return (millis_overflow_counter * millis_overflow_value) + millis
 
 
 def millis_passed(timestamp):
