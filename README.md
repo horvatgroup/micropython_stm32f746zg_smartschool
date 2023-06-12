@@ -37,7 +37,7 @@ cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/flashbdev.c ./
 make -C mpy-cross
 cd ports/stm32/
 make submodules
-make BOARD=NUCLEO_F746ZG
+make BOARD=NUCLEO_F746ZG FROZEN_MANIFEST=../../lib/micropython-lib/micropython/drivers/sensor/ds18x20/manifest.py
 cd build-NUCLEO_F746ZG
 objcopy -I ihex firmware.hex -O binary firmware.bin
 cp firmware.* ../../../../micropython_stm32f746zg_smartschool/build-NUCLEO_F746ZG/
