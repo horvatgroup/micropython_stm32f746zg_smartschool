@@ -4,6 +4,7 @@ import driver_bme680
 import common_pins
 import driver_bh1750fvi
 import driver_mhz19b
+import onewire, ds18x20
 
 environment_sensors = []
 realtime_sensors = []
@@ -106,6 +107,31 @@ class Co2:
             self.error_msg = e
             self.reinit_uart = True
 
+class DsTempReader:
+    def __init__(self, ds_pin, alias):
+        self.ds_pin = ds_pin
+        self.alias = alias
+        self.ds_sensor = ds18x20.DS18X20(onewire.OneWire(self.ds_pin))
+        self.data = []
+        self.error_msg = None
+        self.timestamp = None
+        self.timeout = 60 * 1000
+
+    def get_name(self, rom):
+        return ''.join(struct.pack('B', x).hex() for x in rom)
+
+    async def action(self):
+        try:
+            roms = self.ds_sensor.scan()
+            self.ds_sensor.convert_temp()
+            await asyncio.sleep_ms(750)
+            for rom in roms:
+                temp = self.ds_sensor.read_temp(rom)
+                print(self.get_name(rom), temp)
+        except Exception as e:
+            print("[SENSORS]: ERROR @ %s read with %s" % (self.alias, e))
+            self.error_msg = e
+
 
 def register_on_state_change_callback(cb):
     global on_state_change_cb
@@ -123,7 +149,8 @@ def init():
     environment_sensors.append(Co2(common_pins.S1_UART5.id, alias="S1_CO2"))
 
     s2_i2c = common.create_i2c(common_pins.S2_SCL_BUF_I2C_2.id, common_pins.S2_SDA_BUF_I2C_2.id)
-    realtime_sensors.append(Radar(common_pins.S2_RADAR_SIG.id, alias="S2_RADAR"))
+    #realtime_sensors.append(Radar(common_pins.S2_RADAR_SIG.id, alias="S2_RADAR"))
+    environment_sensors.append(DsTempReader(common_pins.S2_RADAR_SIG.id, alias="S2_DSTEPM"))
     environment_sensors.append(Environment(s2_i2c, alias="S2_ENV"))
     environment_sensors.append(Light(s2_i2c, alias="S2_LIGHT"))
     environment_sensors.append(Co2(common_pins.S2_UART2.id, alias="S2_CO2"))
