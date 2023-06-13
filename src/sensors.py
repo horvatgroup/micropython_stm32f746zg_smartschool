@@ -115,20 +115,19 @@ class DsTempReader:
         self.alias = alias
         self.ds_sensor = ds18x20.DS18X20(onewire.OneWire(machine.Pin(self.ds_pin)))
         self.dirty = False
-        self.data = None
+        self.data = {}
         self.error_msg = None
         self.timestamp = None
         self.timeout = 60 * 1000
 
     def get_name(self, rom):
-        return ''.join(struct.pack('B', x).hex() for x in rom).upper()
+        return ''.join(struct.pack('B', x).hex() for x in rom)
 
     async def action(self):
         try:
             roms = self.ds_sensor.scan()
             self.ds_sensor.convert_temp()
             await asyncio.sleep_ms(750)
-            self.data = {}
             for rom in roms:
                 name = self.get_name(rom)
                 temp = self.ds_sensor.read_temp(rom)
@@ -176,10 +175,15 @@ async def environment_sensors_action():
                 await sensor.action()
                 if sensor.dirty:
                     sensor.dirty = False
-                    if "_ENV" in sensor.alias or "_DSTEMP" in sensor.alias:
+                    if "_ENV" in sensor.alias:
                         for key in sensor.data:
                             if on_state_change_cb is not None:
                                 on_state_change_cb(f"{sensor.alias}_{key}", sensor.data[key])
+                    elif "_DSTEMP" in sensor.alias:
+                        for key in list(sensor.data.keys()):
+                            if on_state_change_cb is not None:
+                                on_state_change_cb(f"{sensor.alias}/{key}", sensor.data[key])
+                            del sensor.data[key]
                     else:
                         if on_state_change_cb is not None:
                             on_state_change_cb(sensor.alias, sensor.data)

@@ -21,9 +21,11 @@ class Thing:
         self.cb_in = cb_in
 
 
-things = (
+things = [
     # sensors
     Thing("S2/radar", alias="S1_RADAR", cb_in=sensors.on_data_request),
+    Thing("S2/dstemp", alias="S1_DSTEMP", cb_in=sensors.on_data_request),
+    Thing("S2/dstemp/error", alias="S1_DSTEMP_ERROR", cb_in=sensors.on_data_request),
     Thing("S2/env", alias="S1_ENV", cb_in=sensors.on_data_request),
     Thing("S2/env/error", alias="S1_ENV_ERROR", cb_in=sensors.on_data_request),
     Thing("S2/env/temperature", alias="S1_ENV_TEMPERATURE"),
@@ -36,6 +38,8 @@ things = (
     Thing("S2/co2", alias="S1_CO2", cb_in=sensors.on_data_request),
     Thing("S2/co2/error", alias="S1_CO2_ERROR", cb_in=sensors.on_data_request),
     Thing("S1/radar", alias="S2_RADAR", cb_in=sensors.on_data_request),
+    Thing("S1/dstemp", alias="S2_DSTEMP", cb_in=sensors.on_data_request),
+    Thing("S1/dstemp/error", alias="S2_DSTEMP_ERROR", cb_in=sensors.on_data_request),
     Thing("S1/env", alias="S2_ENV", cb_in=sensors.on_data_request),
     Thing("S1/env/error", alias="S2_ENV_ERROR", cb_in=sensors.on_data_request),
     Thing("S1/env/temperature", alias="S2_ENV_TEMPERATURE"),
@@ -94,7 +98,7 @@ things = (
     Thing("co2_alarm/1", cb_in=phy_interface.on_data_received),
     Thing("co2_alarm/2", cb_in=phy_interface.on_data_received),
     Thing("heartbeat"),
-)
+]
 
 
 def get_thing_from_path(path):
@@ -127,9 +131,22 @@ def on_sensor_state_change_callback(alias, data):
             if t.dirty_out == True:
                 t.data += data
         send_msg_req(t, data)
+        return
+
     t = get_thing_from_path(alias)
     if t is not None:
         send_msg_req(t, data)
+        return
+
+    if "_DSTEMP" in alias:
+        alias_base, address = alias.split("/")
+        t_base = get_thing_from_alias(alias_base)
+        if t_base is not None:
+            path = f"{t_base.path}/{address}"
+            t = Thing(path=path, alias=alias)
+            things.append(t)
+            send_msg_req(t, data)
+            return
 
 
 def on_mqtt_message_received_callback(path, msg):

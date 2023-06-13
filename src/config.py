@@ -1,2 +1,2 @@
 s1_radar_enabled_dstemp_disabled = True
-s2_radar_enabled_dstemp_disabled = False
+s2_radar_enabled_dstemp_disabled = True
