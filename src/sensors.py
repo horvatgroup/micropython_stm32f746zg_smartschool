@@ -4,7 +4,8 @@ import driver_bme680
 import common_pins
 import driver_bh1750fvi
 import driver_mhz19b
-import onewire, ds18x20
+import machine, onewire, ds18x20
+import struct
 
 environment_sensors = []
 realtime_sensors = []
@@ -111,23 +112,27 @@ class DsTempReader:
     def __init__(self, ds_pin, alias):
         self.ds_pin = ds_pin
         self.alias = alias
-        self.ds_sensor = ds18x20.DS18X20(onewire.OneWire(self.ds_pin))
-        self.data = []
+        self.ds_sensor = ds18x20.DS18X20(onewire.OneWire(machine.Pin(self.ds_pin)))
+        self.dirty = False
+        self.data = None
         self.error_msg = None
         self.timestamp = None
         self.timeout = 60 * 1000
 
     def get_name(self, rom):
-        return ''.join(struct.pack('B', x).hex() for x in rom)
+        return ''.join(struct.pack('B', x).hex() for x in rom).upper()
 
     async def action(self):
         try:
             roms = self.ds_sensor.scan()
             self.ds_sensor.convert_temp()
             await asyncio.sleep_ms(750)
+            self.data = {}
             for rom in roms:
+                name = self.get_name(rom)
                 temp = self.ds_sensor.read_temp(rom)
-                print(self.get_name(rom), temp)
+                self.data[name] = temp
+                self.dirty = True
         except Exception as e:
             print("[SENSORS]: ERROR @ %s read with %s" % (self.alias, e))
             self.error_msg = e
@@ -150,7 +155,7 @@ def init():
 
     s2_i2c = common.create_i2c(common_pins.S2_SCL_BUF_I2C_2.id, common_pins.S2_SDA_BUF_I2C_2.id)
     #realtime_sensors.append(Radar(common_pins.S2_RADAR_SIG.id, alias="S2_RADAR"))
-    environment_sensors.append(DsTempReader(common_pins.S2_RADAR_SIG.id, alias="S2_DSTEPM"))
+    environment_sensors.append(DsTempReader(common_pins.S2_RADAR_SIG.id, alias="S2_DSTEMP"))
     environment_sensors.append(Environment(s2_i2c, alias="S2_ENV"))
     environment_sensors.append(Light(s2_i2c, alias="S2_LIGHT"))
     environment_sensors.append(Co2(common_pins.S2_UART2.id, alias="S2_CO2"))
@@ -165,7 +170,7 @@ async def environment_sensors_action():
                 await sensor.action()
                 if sensor.dirty:
                     sensor.dirty = False
-                    if "_ENV" in sensor.alias:
+                    if "_ENV" in sensor.alias or "_DSTEMP" in sensor.alias:
                         for key in sensor.data:
                             if on_state_change_cb is not None:
                                 on_state_change_cb(f"{sensor.alias}_{key}", sensor.data[key])
