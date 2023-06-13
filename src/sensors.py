@@ -6,6 +6,7 @@ import driver_bh1750fvi
 import driver_mhz19b
 import machine, onewire, ds18x20
 import struct
+import config
 
 environment_sensors = []
 realtime_sensors = []
@@ -148,14 +149,19 @@ def init():
     print("[SENSORS]: init")
     global environment_sensors, realtime_sensors
     s1_i2c = common.create_i2c(common_pins.S1_SCL_BUF_I2C_1.id, common_pins.S1_SDA_BUF_I2C_1.id)
-    realtime_sensors.append(Radar(common_pins.S1_RADAR_SIG.id, alias="S1_RADAR"))
+    if config.s1_radar_enabled_dstemp_disabled:
+        realtime_sensors.append(Radar(common_pins.S1_RADAR_SIG.id, alias="S1_RADAR"))
+    else:
+        environment_sensors.append(DsTempReader(common_pins.S1_RADAR_SIG.id, alias="S1_DSTEMP"))
     environment_sensors.append(Environment(s1_i2c, alias="S1_ENV"))
     environment_sensors.append(Light(s1_i2c, alias="S1_LIGHT"))
     environment_sensors.append(Co2(common_pins.S1_UART5.id, alias="S1_CO2"))
 
     s2_i2c = common.create_i2c(common_pins.S2_SCL_BUF_I2C_2.id, common_pins.S2_SDA_BUF_I2C_2.id)
-    #realtime_sensors.append(Radar(common_pins.S2_RADAR_SIG.id, alias="S2_RADAR"))
-    environment_sensors.append(DsTempReader(common_pins.S2_RADAR_SIG.id, alias="S2_DSTEMP"))
+    if config.s2_radar_enabled_dstemp_disabled:
+        realtime_sensors.append(Radar(common_pins.S2_RADAR_SIG.id, alias="S2_RADAR"))
+    else:
+        environment_sensors.append(DsTempReader(common_pins.S2_RADAR_SIG.id, alias="S2_DSTEMP"))
     environment_sensors.append(Environment(s2_i2c, alias="S2_ENV"))
     environment_sensors.append(Light(s2_i2c, alias="S2_LIGHT"))
     environment_sensors.append(Co2(common_pins.S2_UART2.id, alias="S2_CO2"))
