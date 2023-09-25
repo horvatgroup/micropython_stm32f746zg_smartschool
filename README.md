@@ -28,16 +28,18 @@ Following [Micropython's README](https://github.com/micropython/micropython/tree
 ```bash
 git clone https://github.com/micropython/micropython.git
 cd micropython
-git checkout v1.17
+git checkout v1.20
 cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/NUCLEO_F746ZG/pins.csv ./ports/stm32/boards/NUCLEO_F746ZG/
 cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/NUCLEO_F746ZG/mpconfigboard.h ./ports/stm32/boards/NUCLEO_F746ZG/
-cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/NUCLEO_F746ZG/mpconfigboard.mk ./ports/stm32/boards/NUCLEO_F746ZG/
 cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/NUCLEO_F746ZG/manifest.py ./ports/stm32/boards/NUCLEO_F746ZG/
-cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/stm32f746.ld ./ports/stm32/boards/
+cp ../micropython_stm32f746zg_smartschool/micropython/ports/stm32/boards/manifest.py ./ports/stm32/boards/
+# https://groups.google.com/g/linux.debian.bugs.dist/c/7STyhQksi5o
 make -C mpy-cross
 cd ports/stm32/
 make submodules
 git submodule update --init
+mkdir modules
+cp ../../../micropython_stm32f746zg_smartschool/src/* modules/
 make BOARD=NUCLEO_F746ZG
 cd build-NUCLEO_F746ZG
 objcopy -I ihex firmware.hex -O binary firmware.bin

@@ -29,32 +29,32 @@
 #define MICROPY_HW_FLASH_LATENCY    FLASH_LATENCY_7 // 210-216 MHz needs 7 wait states
 
 // UART config
-#define MICROPY_HW_UART3_TX         (pin_D8)
-#define MICROPY_HW_UART3_RX         (pin_D9)
-#define MICROPY_HW_UART_REPL        PYB_UART_3
-#define MICROPY_HW_UART_REPL_BAUD   115200
 #define MICROPY_HW_UART2_TX         (pin_D5)
 #define MICROPY_HW_UART2_RX         (pin_D6)
+#define MICROPY_HW_UART3_TX         (pin_D8)
+#define MICROPY_HW_UART3_RX         (pin_D9)
 // #define MICROPY_HW_UART4_TX         (pin_D5)
 // #define MICROPY_HW_UART4_RX         (pin_D6)
 #define MICROPY_HW_UART5_TX         (pin_C12)
 #define MICROPY_HW_UART5_RX         (pin_D2)
 #define MICROPY_HW_UART6_TX         (pin_G14)
 #define MICROPY_HW_UART6_RX         (pin_G9)
+#define MICROPY_HW_UART_REPL        PYB_UART_3
+#define MICROPY_HW_UART_REPL_BAUD   115200
 
-// I2C busses
+// I2C buses
 #define MICROPY_HW_I2C1_SCL         (pin_B8)
 #define MICROPY_HW_I2C1_SDA         (pin_B9)
 #define MICROPY_HW_I2C2_SCL         (pin_F1)
 #define MICROPY_HW_I2C2_SDA         (pin_F0)
 
-// SPI
+// SPI buses
 #define MICROPY_HW_SPI3_NSS         (pin_A4)
 #define MICROPY_HW_SPI3_SCK         (pin_B3)
 #define MICROPY_HW_SPI3_MISO        (pin_B4)
 #define MICROPY_HW_SPI3_MOSI        (pin_B5)
 
-// CAN busses
+// CAN buses
 #define MICROPY_HW_CAN1_TX          (pin_B9)
 #define MICROPY_HW_CAN1_RX          (pin_B8)
 #define MICROPY_HW_CAN2_TX          (pin_B13)
