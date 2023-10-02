@@ -3,8 +3,8 @@ STLink firmware upgrade applications
 1. In folder Windows:
 
    Contains the application in its "historical" form: executable dedicated to Windows + dll.
-   With all most recent firmwares (V1J13S3 for ST-Link/V1 boards, V2J24S4 for ST-Link/V2 boards,
-   and V2J24M11 for ST-Link/V2-1 boards)
+   With all most recent firmwares (V1J13S3 for ST-Link/V1 boards, V2J36S7 for ST-Link/V2 boards,
+   V2J36M26 for ST-Link/V2-1 boards, V3J6M2 for STLINK-V3 boards)
 
 2. In folder AllPlatforms:
 
@@ -19,11 +19,5 @@ STLink firmware upgrade applications
    instance on Ubuntu, through the command "sudo apt-get install libusb-1.0".
 
    On Linux, users must be granted with rights for accessing the ST-Link USB devices. To do
-   that, it might be necessary to add rules into /etc/udev/rules.d. For instance on Ubuntu,
-   through the command "sudo cp 49-stlinkv2-1.rules /etc/udev/rules.d".
-   
-   Tested on:
-   - Windows7 64bits
-   - Linux Fedora (32 and 64bits)
-   - Linux Ubuntu (64 bits)
-   - MacOS 10.9.3
+   that, it might be necessary to add rules into /etc/udev/rules.d. This can be achieved by
+   running one of the package provided into the subdirectory StlinkRulesFilesForLinux.
