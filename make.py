@@ -127,7 +127,7 @@ def sync():
 
 
 @app.command()
-def _cp(file):
+def single_cp(file):
     cmd = "%s cp %s /pyboard/flash/" % (get_rshell_base_command(), file)
     lines = run_bash_cmd(cmd)
     for line in lines:
@@ -145,7 +145,7 @@ def cp():
         for e, f in enumerate(files):
             print("[%d] %s" % (e, f.split("/")[2]))
         index = int(input("Select index: "))
-        _cp(files[index])
+        single_cp(files[index])
 
 
 @app.command()
@@ -175,10 +175,10 @@ def rm():
 def cp_all():
     files = glob.glob("./src/*.py")
     for file in files:
-        if not _cp(file):
+        if not single_cp(file):
             _rm(file)
             input("restart board and and press Return")
-            if not _cp(file):
+            if not single_cp(file):
                 print("Can't copy aborting")
 
 
