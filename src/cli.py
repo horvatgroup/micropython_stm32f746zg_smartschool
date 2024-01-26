@@ -118,8 +118,8 @@ def parse_lan(cmd):
         lan.init()
     elif cmd[1] == "check":
         lan.check_link()
-    elif cmd[1] == "mac":
-        lan.print_mac()
+    elif cmd[1] == "status":
+        lan.print_status()
     else:
         print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
 

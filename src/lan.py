@@ -41,13 +41,11 @@ async def check_link():
         return True
     return False
 
+def print_status():
+    print(f"[DEBUG] mac[{mac}] active[{eth.active()}] isconnected[{eth.isconnected()}] status[{eth.status()}] ip[{eth.ifconfig()}]")
 
 def init():
     print("[LAN]: init")
     global eth, mac
     eth = network.LAN()
     mac = "".join(['{:02X}'.format(x) for x in eth.config('mac')])
-
-
-def print_mac():
-    print("[LAN]: mac %s" % (mac))
