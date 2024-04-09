@@ -121,7 +121,7 @@ def parse_lan(cmd):
     elif cmd[1] == "status":
         lan.print_status()
     elif cmd[1] == "registers":
-        lan.print_registers()
+        lan.registers()
     else:
         print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
 

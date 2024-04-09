@@ -16078,7 +16078,8 @@ LOAD /usr/lib/gcc/arm-none-eabi/13.2.0/thumb/v7e-m+fp/hard/libgcc.a
  .rodata.const_obj_cli_6
                 0x08087404       0x10 build-NUCLEO_F746ZG/build-NUCLEO_F746ZG/frozen_content.o
  .rodata.const_qstr_table_data_cli
-                0x08087414       0xa4 build-NUCLEO_F746ZG/build-NUCLEO_F746ZG/frozen_content.o
+                0x08087414       0xa2 build-NUCLEO_F746ZG/build-NUCLEO_F746ZG/frozen_content.o
+ *fill*         0x080874b6        0x2 
  .rodata.raw_code_cli__lt_module_gt_
                 0x080874b8       0x10 build-NUCLEO_F746ZG/build-NUCLEO_F746ZG/frozen_content.o
  .rodata.children_cli__lt_module_gt_
