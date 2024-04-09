@@ -44,6 +44,51 @@ async def check_link():
 def print_status():
     print(f"[DEBUG] mac[{mac}] active[{eth.active()}] isconnected[{eth.isconnected()}] status[{eth.status()}] ip[{eth.ifconfig()}]")
 
+def get_bit(byteval, idx):
+    return int((byteval & (1 << idx)) != 0)
+
+def get_registers():
+    bcr = eth.register_bcr()
+    bsr = eth.register_bsr()
+    cbln = eth.register_cbln()
+    scsr = eth.register_scsr()
+    return bcr, bsr, cbln, scsr
+
+def print_registers(bcr = None, bsr = None, cbln = None, scsr = None):
+    if bcr is not None:
+        print(f"[DEBUG] BCR:Soft Reset {get_bit(bcr, 15)}")
+        print(f"[DEBUG] BCR:Loopback {get_bit(bcr, 14)}")
+        print(f"[DEBUG] BCR:Speed Select {get_bit(bcr, 13)}")
+        print(f"[DEBUG] BCR:Auto-Negotiation Enable {get_bit(bcr, 12)}")
+        print(f"[DEBUG] BCR:Power Down {get_bit(bcr, 11)}")
+        print(f"[DEBUG] BCR:Isolate {get_bit(bcr, 10)}")
+        print(f"[DEBUG] BCR:Restart Auto-Negotiate {get_bit(bcr, 9)}")
+        print(f"[DEBUG] BCR:Duplex Mode {get_bit(bcr, 8)}")
+    if bsr is not None:
+        print(f"[DEBUG] BSR:100BASE-T4 {get_bit(bsr, 15)}")
+        print(f"[DEBUG] BSR:100BASE-TX Full Duplex {get_bit(bsr, 14)}")
+        print(f"[DEBUG] BSR:100BASE-TX Half Duplex {get_bit(bsr, 13)}")
+        print(f"[DEBUG] BSR:10BASE-T Full Duplex {get_bit(bsr, 12)}")
+        print(f"[DEBUG] BSR:10BASE-T Half Duplex {get_bit(bsr, 11)}")
+        print(f"[DEBUG] BSR:100BASE-T2 Full Duplex {get_bit(bsr, 10)}")
+        print(f"[DEBUG] BSR:100BASE-T2 Half Duplex {get_bit(bsr, 9)}")
+        print(f"[DEBUG] BSR:Extended Status {get_bit(bsr, 8)}")
+        print(f"[DEBUG] BSR:Auto-Negotiate Complete {get_bit(bsr, 5)}")
+        print(f"[DEBUG] BSR:Remote Fault {get_bit(bsr, 4)}")
+        print(f"[DEBUG] BSR:Auto-Negotiate Ability {get_bit(bsr, 3)}")
+        print(f"[DEBUG] BSR:Link Status {get_bit(bsr, 2)}")
+        print(f"[DEBUG] BSR:Jabber Detect {get_bit(bsr, 1)}")
+        print(f"[DEBUG] BSR:Extended Capabilities {get_bit(bsr, 0)}")
+    if cbln is not None:
+        print(f"[DEBUG] CBLN:Cable Length {get_bit(cbln, 15)}{get_bit(cbln, 14)}{get_bit(cbln, 13)}{get_bit(cbln, 12)}")
+    if scsr is not None:
+        print(f"[DEBUG] SCSR:Autodone {get_bit(scsr, 12)}")
+        print(f"[DEBUG] SCSR:Speed Indication (?bit order) {get_bit(scsr, 4)}{get_bit(scsr, 3)}{get_bit(scsr, 2)}")
+
+def registers():
+    bcr, bsr, cbln, scsr = get_registers()
+    print_registers(bcr, bsr, cbln, scsr)
+
 def init():
     print("[LAN]: init")
     global eth, mac
