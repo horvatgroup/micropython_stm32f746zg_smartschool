@@ -1,3 +1,4 @@
 .idea/
 credentials.py
+extra/credentials.py
 src/credentials.py
