@@ -43,8 +43,12 @@ cp ../../../micropython_stm32f746zg_smartschool/src/* modules/
 make BOARD=NUCLEO_F746ZG
 cd build-NUCLEO_F746ZG
 objcopy -I ihex firmware.hex -O binary firmware.bin
-cp firmware.* ../../../../micropython_stm32f746zg_smartschool/build-NUCLEO_F746ZG/
+cd ..
+cp build-NUCLEO_F746ZG/firmware.* ../../../micropython_stm32f746zg_smartschool/extra/build-NUCLEO_F746ZG/
 ```
+
+## Compile micropython
+There is a script called `compile_mp_and_flash.sh` which is used for developing and testing micropython builds.
 
 ## Testing
 ### MQTT using mosquitto
