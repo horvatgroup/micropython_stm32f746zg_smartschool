@@ -11,6 +11,7 @@ import phy_interface
 import power_counter
 import heartbeat
 import lan_testing
+import version
 
 
 async def process_time_measure(timeout=20):
@@ -27,6 +28,13 @@ async def process_time_measure(timeout=20):
         timestamp = common.get_millis()
 
 
+def send_on_boot():
+    print("[RUNNER]: send_on_boot")
+    t = things.get_thing_from_path("version")
+    t.data = version.VERSION
+    t.dirty_out = True
+
+
 def init():
     print("[RUNNER]: init")
     buttons.init()
@@ -38,6 +46,7 @@ def init():
     mqtt.init()
     cli.init()
     things.init()
+    send_on_boot()
 
 
 async def add_tasks():

@@ -1,5 +1,4 @@
-VERSION = 4.1
-
+VERSION = 4.2
 
 def req_version(thing):
     print("[VER] req_version %s" % (str(thing.data)))
