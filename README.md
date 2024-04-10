@@ -50,6 +50,9 @@ cp build-NUCLEO_F746ZG/firmware.* ../../../micropython_stm32f746zg_smartschool/e
 ## Compile micropython
 There is a script called `compile_mp_and_flash.sh` which is used for developing and testing micropython builds.
 
+## Flash example
+`sudo mount /dev/sdb /mnt/usb/ && sudo cp extra/build-NUCLEO_F746ZG/firmware.bin /mnt/usb/ && sudo umount /mnt/usb`
+
 ## Testing
 ### MQTT using mosquitto
 - install `sudo pacman -S mosquitto`
