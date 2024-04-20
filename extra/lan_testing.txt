@@ -1,0 +1,104 @@
+# 01 empty board starts with cable disconnected
+
+## all
+[DEBUG] BCR:Soft Reset 0
+[DEBUG] BCR:Loopback 0
+[DEBUG] BCR:Speed Select 1
+[DEBUG] BCR:Auto-Negotiation Enable 1
+[DEBUG] BCR:Power Down 0
+[DEBUG] BCR:Isolate 0
+[DEBUG] BCR:Restart Auto-Negotiate 0
+[DEBUG] BCR:Duplex Mode 0
+[DEBUG] BSR:100BASE-T4 0
+[DEBUG] BSR:100BASE-TX Full Duplex 1
+[DEBUG] BSR:100BASE-TX Half Duplex 1
+[DEBUG] BSR:10BASE-T Full Duplex 1
+[DEBUG] BSR:10BASE-T Half Duplex 1
+[DEBUG] BSR:100BASE-T2 Full Duplex 0
+[DEBUG] BSR:100BASE-T2 Half Duplex 0
+[DEBUG] BSR:Extended Status 0
+[DEBUG] BSR:Auto-Negotiate Complete 0
+[DEBUG] BSR:Remote Fault 0
+[DEBUG] BSR:Auto-Negotiate Ability 1
+[DEBUG] BSR:Link Status 0
+[DEBUG] BSR:Jabber Detect 0
+[DEBUG] BSR:Extended Capabilities 1
+[DEBUG] CBLN:Cable Length 0000
+[DEBUG] SCSR:Autodone 0
+[DEBUG] SCSR:Speed Indication (?bit order) 000
+
+# 02 cable connected
+
+## diff only
+[DEBUG] BCR:Duplex Mode 1
+[DEBUG] BSR:Auto-Negotiate Complete 1
+[DEBUG] BSR:Link Status 1
+[DEBUG] CBLN:Cable Length 0100
+[DEBUG] SCSR:Autodone 1
+[DEBUG] SCSR:Speed Indication (?bit order) 110
+
+## all
+[DEBUG] BCR:Soft Reset 0
+[DEBUG] BCR:Loopback 0
+[DEBUG] BCR:Speed Select 1
+[DEBUG] BCR:Auto-Negotiation Enable 1
+[DEBUG] BCR:Power Down 0
+[DEBUG] BCR:Isolate 0
+[DEBUG] BCR:Restart Auto-Negotiate 0
+[DEBUG] BCR:Duplex Mode 1
+[DEBUG] BSR:100BASE-T4 0
+[DEBUG] BSR:100BASE-TX Full Duplex 1
+[DEBUG] BSR:100BASE-TX Half Duplex 1
+[DEBUG] BSR:10BASE-T Full Duplex 1
+[DEBUG] BSR:10BASE-T Half Duplex 1
+[DEBUG] BSR:100BASE-T2 Full Duplex 0
+[DEBUG] BSR:100BASE-T2 Half Duplex 0
+[DEBUG] BSR:Extended Status 0
+[DEBUG] BSR:Auto-Negotiate Complete 1
+[DEBUG] BSR:Remote Fault 0
+[DEBUG] BSR:Auto-Negotiate Ability 1
+[DEBUG] BSR:Link Status 1
+[DEBUG] BSR:Jabber Detect 0
+[DEBUG] BSR:Extended Capabilities 1
+[DEBUG] CBLN:Cable Length 0100
+[DEBUG] SCSR:Autodone 1
+[DEBUG] SCSR:Speed Indication (?bit order) 110
+
+# 03 disconnecting the cable
+
+## diff to 01
+
+[DEBUG] BCR:Duplex Mode 1
+
+# 04 eth active without cable
+## by disconnecting the cable it does not detect the Link Status changes
+
+[DEBUG] BCR:Soft Reset 0
+[DEBUG] BCR:Loopback 0
+[DEBUG] BCR:Speed Select 0
+[DEBUG] BCR:Auto-Negotiation Enable 0
+[DEBUG] BCR:Power Down 0
+[DEBUG] BCR:Isolate 0
+[DEBUG] BCR:Restart Auto-Negotiate 0
+[DEBUG] BCR:Duplex Mode 0
+[DEBUG] BSR:100BASE-T4 0
+[DEBUG] BSR:100BASE-TX Full Duplex 0
+[DEBUG] BSR:100BASE-TX Half Duplex 0
+[DEBUG] BSR:10BASE-T Full Duplex 0
+[DEBUG] BSR:10BASE-T Half Duplex 0
+[DEBUG] BSR:100BASE-T2 Full Duplex 0
+[DEBUG] BSR:100BASE-T2 Half Duplex 0
+[DEBUG] BSR:Extended Status 0
+[DEBUG] BSR:Auto-Negotiate Complete 0
+[DEBUG] BSR:Remote Fault 0
+[DEBUG] BSR:Auto-Negotiate Ability 0
+[DEBUG] BSR:Link Status 0
+[DEBUG] BSR:Jabber Detect 0
+[DEBUG] BSR:Extended Capabilities 0
+[DEBUG] CBLN:Cable Length 0000
+[DEBUG] SCSR:Autodone 0
+[DEBUG] SCSR:Speed Indication (?bit order) 000
+
+# 05 eth active while cabble is connected
+# diff only to 02 after the active has finished
+[DEBUG] BCR:Speed Select 0

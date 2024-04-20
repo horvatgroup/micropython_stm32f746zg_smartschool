@@ -13,32 +13,27 @@ _DHCP_TIMEOUT_SLEEP_MS = const(30 * 60 * 1000)
 
 mac = ""
 eth = None
+activated = False
+reinit_lwip = False
 
-
-async def check_link():
-    status = eth.status()
-    if status == 0:
-        print("[LAN]: Link Down")
-    if status == 1:
-        print("[LAN]: Link Join")
-        try:
+def check_link():
+    global activated, reinit_lwip
+    link_status = get_link_status()
+    if not link_status:
+        print("[LAN]: lan cable not connected")
+    else:
+        if not activated:
+            print("[LAN]: activating")
+            eth.active(False)
             eth.active(True)
-        except Exception as e:
-            print("[LAN]: ERROR %s" % (e))
-    elif status == 2:
-        print("[LAN]: Link No-IP")
-        dhcp_error = False
-        try:
-            eth.ifconfig('dhcp')
-        except Exception as e:
-            print("[LAN]: ERROR %s" % (e))
-            dhcp_error = True
-        if dhcp_error:
-            print("[LAN]: Waiting %d until nekt try" % (_DHCP_TIMEOUT_SLEEP_MS))
-            await asyncio.sleep_ms(_DHCP_TIMEOUT_SLEEP_MS)
-    elif status == 3:
-        print("[LAN]: Link Up")
-        return True
+            activated = True
+        else:
+            if reinit_lwip:
+                print("[LAN]: reinit lwip")
+                eth.reinit_lwip()
+                reinit_lwip = False
+            else:
+                return True
     return False
 
 def print_status():
@@ -88,6 +83,20 @@ def print_registers(bcr = None, bsr = None, cbln = None, scsr = None):
 def registers():
     bcr, bsr, cbln, scsr = get_registers()
     print_registers(bcr, bsr, cbln, scsr)
+
+def get_link_status():
+    bsr = eth.register_bsr()
+    return bool(get_bit(bsr, 2))
+
+def request_reinit_lwip():
+    print("[LAN]: require reinit lwip")
+    global reinit_lwip
+    reinit_lwip = True
+
+def request_reactivate():
+    print("[LAN]: require reactivate")
+    global activated
+    activated = False
 
 def init():
     print("[LAN]: init")

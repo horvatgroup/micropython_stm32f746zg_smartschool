@@ -10,6 +10,7 @@ import gc
 import usocket as socket
 import ustruct as struct
 import lan
+import lan_testing
 
 gc.collect()
 from ubinascii import hexlify
@@ -497,6 +498,10 @@ class MQTTClient(MQTT_base):
 
     async def wifi_connect(self):
         if LINUX is True:  # no network control, assume connected as OS takes care of that
+            while True:
+                if lan.check_link():
+                    break
+                await asyncio.sleep(1)
             self._sta_isconnected = True
             return
         s = self._sta_if
@@ -551,13 +556,33 @@ class MQTTClient(MQTT_base):
             self._addr = socket.getaddrinfo(self.server, self.port)[0][-1]
         self._in_connect = True  # Disable low level ._isconnected check
         clean = self._clean if self._has_connected else self._clean_init
+        lan_reinit_lwip_counter = 0
+        lan_reinit_lwip_max = 10
+        lan_reactivate_counter = 0
+        lan_reactivate_max = 10
         while True:
             try:
                 print("[MQTTAS]: Trying to connect")
-                await self._connect(clean)
-                break
+                if not lan.check_link():
+                    await asyncio.sleep(10)
+                    raise
+                else:
+                    await self._connect(clean)
+                    break
             except Exception:
-                print("[MQTTAS]: Cant connect; retry")
+                lan_reinit_lwip_counter += 1
+                lan_testing.lan_reinit_lwip_add()
+                if lan_reinit_lwip_counter == lan_reinit_lwip_max:
+                    lan_reactivate_counter += 1
+                    lan_testing.lan_reactivate_add()
+                print(f"[MQTTAS]: Cant connect; retry {lan_reinit_lwip_counter}/{lan_reinit_lwip_max}, reactivate {lan_reactivate_counter}/{lan_reactivate_max}")
+                if lan_reactivate_counter == lan_reactivate_max:
+                    lan_reactivate_counter = 0
+                    lan_reinit_lwip_counter = 0
+                    lan.request_reactivate()
+                elif lan_reinit_lwip_counter == lan_reinit_lwip_max:
+                    lan_reinit_lwip_counter = 0
+                    lan.request_reinit_lwip()
                 await asyncio.sleep(1)
                 # self.close()
                 # raise

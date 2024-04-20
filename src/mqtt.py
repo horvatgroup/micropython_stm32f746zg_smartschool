@@ -83,15 +83,10 @@ async def loop_async():
     print("[MQTT]: start loop_async")
     while True:
         try:
-            print("[MQTT]: connect to LAN")
-            while True:
-                if await lan.check_link() == True:
-                    break
-                await asyncio.sleep(1)
-
             print("[MQTT]: connect to MQTT")
             await client.connect()
             while True:
+                print("[MQTT]: handle connection")
                 await asyncio.sleep(10)
         except Exception as e:
             print("[MQTT]: error connect with %s" % (e))
