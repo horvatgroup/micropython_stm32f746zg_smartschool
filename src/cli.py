@@ -142,6 +142,20 @@ def parse_mqtt(cmd):
         print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
 
 
+def parse_test(cmd):
+    if cmd[1] == "loop":
+        timestamp = common.get_millis()
+        timeout = 10000
+        if len(cmd) == 3:
+            timeout = int(cmd[2])
+        print(f"[TEST]: enter infinite loop for {timeout}")
+        while True:
+            if common.millis_passed(timestamp) >= timeout:
+                break
+            pass
+        print(f"[TEST]: exit infinite loop")
+
+
 def parse_input(cmd):
     if cmd[0] == "leds":
         parse_leds(cmd)
@@ -153,6 +167,8 @@ def parse_input(cmd):
         parse_lan(cmd)
     elif cmd[0] == "mqtt":
         parse_mqtt(cmd)
+    elif cmd[0] == "test":
+        parse_test(cmd)
     else:
         print("[CLI]: \"%s\" not implemented" % (" ".join(cmd)))
 
