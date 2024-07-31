@@ -60,3 +60,13 @@ There is a script called `compile_mp_and_flash.sh` which is used for developing 
 - start `sudo systemctl start mosquitto`
 - subscriber `mosquitto_sub -h <IP> -p 1883 -v -t '#' -F "%I %t %p"`
 - publisher `mosquitto_pub -t mac/in/R/relay8 -m "1"`
+
+## Stop DHCP to wait for address
+- in `extmod/network_lwip.c` comment out the code:
+```        uint32_t start = mp_hal_ticks_ms();
+        while (!dhcp_supplied_address(netif)) {
+            if (mp_hal_ticks_ms() - start > 10000) {
+                mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("timeout waiting for DHCP to get IP address"));
+            }
+            mp_hal_delay_ms(100);
+        }```
