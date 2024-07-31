@@ -98,7 +98,6 @@ things = [
     Thing("co2_alarm/1", cb_in=phy_interface.on_data_received),
     Thing("co2_alarm/2", cb_in=phy_interface.on_data_received),
     Thing("heartbeat"),
-    Thing("lan_testing"),
 ]
 
 
