@@ -14,11 +14,12 @@ _DHCP_TIMEOUT_SLEEP_MS = const(30 * 60 * 1000)
 mac = ""
 eth = None
 activated = False
+reinit_lwip = False
 
 def check_link():
-    global activated
-    link_status = get_link_status()
-    if not link_status:
+    global activated, reinit_lwip
+    link_status = eth.status()
+    if link_status == 0:
         print("[LAN]: lan cable not connected")
     else:
         if not activated:
@@ -27,11 +28,23 @@ def check_link():
             eth.active(True)
             activated = True
         else:
-            return True
+            if reinit_lwip:
+                print("[LAN]: reinit lwip")
+                eth.reinit_lwip()
+                reinit_lwip = False
+            else:
+                return True
     return False
 
 def print_status():
     print(f"[DEBUG] mac[{mac}] active[{eth.active()}] isconnected[{eth.isconnected()}] status[{eth.status()}] ip[{eth.ifconfig()}]")
+
+def get_bit(byteval, idx):
+    return int((byteval & (1 << idx)) != 0)
+
+def get_link_status():
+    bsr = eth.register_bsr()
+    return bool(get_bit(bsr, 2))
 
 def request_reactivate():
     print("[LAN]: require reactivate")
