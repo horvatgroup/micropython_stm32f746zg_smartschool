@@ -6,7 +6,7 @@ import lan
 async def action():
     reboot_confirmation = 0
     while True:
-        if lan.request_reboot:
+        if lan.reboot_requested:
             ready_list = []
             for key in rollos:
                 rollo = rollos[key]

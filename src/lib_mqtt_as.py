@@ -561,7 +561,6 @@ class MQTTClient(MQTT_base):
             try:
                 print("[MQTTAS]: Trying to connect")
                 if not lan.check_link():
-                    await asyncio.sleep(10)
                     raise
                 else:
                     await self._connect(clean)
@@ -569,10 +568,10 @@ class MQTTClient(MQTT_base):
             except Exception:
                 lan_connect_failed_counter += 1
                 print(f"[MQTTAS]: Cant connect; retry {lan_connect_failed_counter}/{lan_connect_failed_max}")
-                if lan_connect_failed_counter == lan_connect_failed_max:
+                if lan_connect_failed_counter >= lan_connect_failed_max:
                     lan_connect_failed_counter = 0
                     lan.request_reboot()
-                await asyncio.sleep(1)
+                await asyncio.sleep(10)
                 # self.close()
                 # raise
         self.rcv_pids.clear()
