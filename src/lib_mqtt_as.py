@@ -555,8 +555,8 @@ class MQTTClient(MQTT_base):
             self._addr = socket.getaddrinfo(self.server, self.port)[0][-1]
         self._in_connect = True  # Disable low level ._isconnected check
         clean = self._clean if self._has_connected else self._clean_init
-        lan_reactivate_counter = 0
-        lan_reactivate_max = 10
+        lan_connect_failed_counter = 0
+        lan_connect_failed_max = 10
         while True:
             try:
                 print("[MQTTAS]: Trying to connect")
@@ -567,11 +567,11 @@ class MQTTClient(MQTT_base):
                     await self._connect(clean)
                     break
             except Exception:
-                lan_reactivate_counter += 1
-                print(f"[MQTTAS]: Cant connect; retry reactivate {lan_reactivate_counter}/{lan_reactivate_max}")
-                if lan_reactivate_counter == lan_reactivate_max:
-                    lan_reactivate_counter = 0
-                    lan.request_reactivate()
+                lan_connect_failed_counter += 1
+                print(f"[MQTTAS]: Cant connect; retry {lan_connect_failed_counter}/{lan_connect_failed_max}")
+                if lan_connect_failed_counter == lan_connect_failed_max:
+                    lan_connect_failed_counter = 0
+                    lan.request_reboot()
                 await asyncio.sleep(1)
                 # self.close()
                 # raise

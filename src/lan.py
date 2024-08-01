@@ -9,15 +9,13 @@ import uasyncio as asyncio
 # https://github.com/micropython/micropython-lib/blob/master/micropython/umqtt.simple/umqtt/simple.py
 # https://github.com/fizista/micropython-umqtt.simple2/blob/master/src/umqtt/simple2.py
 
-_DHCP_TIMEOUT_SLEEP_MS = const(30 * 60 * 1000)
-
 mac = ""
 eth = None
 activated = False
-reinit_lwip = False
+reboot_requested = False
 
 def check_link():
-    global activated, reinit_lwip
+    global activated
     link_status = eth.status()
     if link_status == 0:
         print("[LAN]: lan cable not connected")
@@ -28,28 +26,21 @@ def check_link():
             eth.active(True)
             activated = True
         else:
-            if reinit_lwip:
-                print("[LAN]: reinit lwip")
-                eth.reinit_lwip()
-                reinit_lwip = False
-            else:
-                return True
+            return True
     return False
 
 def print_status():
     print(f"[DEBUG] mac[{mac}] active[{eth.active()}] isconnected[{eth.isconnected()}] status[{eth.status()}] ip[{eth.ifconfig()}]")
 
-def get_bit(byteval, idx):
-    return int((byteval & (1 << idx)) != 0)
-
-def get_link_status():
-    bsr = eth.register_bsr()
-    return bool(get_bit(bsr, 2))
-
 def request_reactivate():
-    print("[LAN]: require reactivate")
+    print("[LAN]: request reactivate")
     global activated
     activated = False
+
+def request_reboot():
+    print("[LAN]: request reboot")
+    global reboot_requested
+    reboot_requested = True
 
 def init():
     print("[LAN]: init")
